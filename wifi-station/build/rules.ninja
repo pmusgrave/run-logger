@@ -1276,13 +1276,13 @@ rule CXX_STATIC_LIBRARY_LINKER____idf_wifi_provisioning
 
 
 #############################################
-# Rule for compiling C files.
+# Rule for compiling CXX files.
 
-rule C_COMPILER____idf_main
+rule CXX_COMPILER____idf_main
   depfile = $DEP_FILE
   deps = gcc
-  command = /home/paul/.espressif/tools/xtensa-esp32-elf/esp-2019r2-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
-  description = Building C object $out
+  command = /home/paul/.espressif/tools/xtensa-esp32-elf/esp-2019r2-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++  $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  description = Building CXX object $out
 
 
 #############################################

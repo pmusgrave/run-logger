@@ -41,6 +41,8 @@ static const char *TAG = "wifi station";
 
 static int s_retry_num = 0;
 
+volatile uint8_t on_wifi = 0;
+
 static void event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data)
 {
@@ -78,12 +80,15 @@ void wifi_init_sta(void)
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
 
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = EXAMPLE_ESP_WIFI_SSID,
-            .password = EXAMPLE_ESP_WIFI_PASS
-        },
-    };
+    wifi_config_t wifi_config = {};
+    wifi_config.sta = {};
+    uint8_t ssid_init_buf[32];
+    memcpy(ssid_init_buf, EXAMPLE_ESP_WIFI_SSID, sizeof(EXAMPLE_ESP_WIFI_SSID)/sizeof(char));
+    memcpy(wifi_config.sta.ssid, ssid_init_buf, 32);
+    uint8_t password_init_buf[64];
+    memcpy(password_init_buf, EXAMPLE_ESP_WIFI_PASS, sizeof(EXAMPLE_ESP_WIFI_PASS)/sizeof(char));
+    memcpy(wifi_config.sta.password, password_init_buf, 64);
+        
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
@@ -103,9 +108,11 @@ void wifi_init_sta(void)
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
                  EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+        on_wifi = 1;
     } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
                  EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+        on_wifi = 0;
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
@@ -115,7 +122,17 @@ void wifi_init_sta(void)
     vEventGroupDelete(s_wifi_event_group);
 }
 
-void app_main(void)
+void synchronize_log(void* pvParameters) {
+    while (1) {
+        if (on_wifi) {
+                
+        }
+
+        vTaskDelay(50);
+    }
+}
+
+extern "C" void app_main(void)
 {
     //Initialize NVS
     esp_err_t ret = nvs_flash_init();
@@ -127,4 +144,9 @@ void app_main(void)
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     wifi_init_sta();
+
+    // Initialize task to synchronize logged data
+    TaskHandle_t xHandle = NULL;
+    xTaskCreate( synchronize_log, "SYNCHRONIZE_LOG", 2048, NULL, tskIDLE_PRIORITY, &xHandle );
+    configASSERT( xHandle );
 }
