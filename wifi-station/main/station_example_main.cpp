@@ -122,7 +122,7 @@ void wifi_init_sta(void)
     vEventGroupDelete(s_wifi_event_group);
 }
 
-void synchronize_log(void* pvParameters) {
+void synchronize_log(void* pvParameter) {
     while (1) {
         if (on_wifi) {
                 
