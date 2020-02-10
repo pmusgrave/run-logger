@@ -103,6 +103,8 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/unity/cmake_install.cmake")
   include("/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/wifi_provisioning/cmake_install.cmake")
   include("/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/main/cmake_install.cmake")
+  include("/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/cmake_install.cmake")
+  include("/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/cmake_install.cmake")
 
 endif()
 

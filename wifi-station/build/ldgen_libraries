@@ -59,3 +59,5 @@
 /home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/unity/libunity.a
 /home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 /home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/main/libmain.a
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/librun.a
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/librunlogger.a

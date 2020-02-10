@@ -531,3 +531,17 @@
 /home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/main/CMakeFiles/install/local.dir
 /home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/main/CMakeFiles/rebuild_cache.dir
 /home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/main/CMakeFiles/install.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/CMakeFiles/install/strip.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/CMakeFiles/edit_cache.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/CMakeFiles/rebuild_cache.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/CMakeFiles/__idf_run.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/CMakeFiles/list_install_components.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/CMakeFiles/install/local.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/run/CMakeFiles/install.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/CMakeFiles/install/strip.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/CMakeFiles/edit_cache.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/CMakeFiles/__idf_runlogger.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/CMakeFiles/install.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/CMakeFiles/rebuild_cache.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/CMakeFiles/list_install_components.dir
+/home/paul/Documents/code/run-logger/wifi-station/build/esp-idf/runlogger/CMakeFiles/install/local.dir
