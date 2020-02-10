@@ -4,11 +4,13 @@ class Run {
 public:
 	Run();
 	~Run();
-	void get_run_status(void);
+	bool get_status(void);
+	double get_duration(void);
+	double get_distance(void);
 
 private:
 	bool in_progress;
 	time_t run_start_time;
 	double duration;
-	uint32_t distance;
+	double distance;
 };
