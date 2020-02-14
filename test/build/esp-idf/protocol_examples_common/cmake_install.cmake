@@ -1,4 +1,4 @@
-# Install script for directory: /home/paul/Documents/code/run-logger/components/runlogger
+# Install script for directory: /home/paul/esp/esp-idf/examples/common_components/protocol_examples_common
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

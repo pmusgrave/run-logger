@@ -8,7 +8,7 @@ public:
 	Run();
 	~Run();
   void start(void);
-	bool get_status(void);
+	bool is_in_progress(void);
 	double get_duration(void);
 	double get_distance(void);
 

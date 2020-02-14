@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 
 # Include the components directory of the main application:
 #
-set(EXTRA_COMPONENT_DIRS "../components")
+set(EXTRA_COMPONENT_DIRS "../components" $ENV{IDF_PATH}/examples/common_components/protocol_examples_common)
 
 # Set the components to include the tests for.
 # This can be overriden from CMake cache:
@@ -11,6 +11,8 @@ set(EXTRA_COMPONENT_DIRS "../components")
 # - when using idf.py: idf.py -T xxxxx build
 #
 set(TEST_COMPONENTS "run" "runlogger" CACHE STRING "List of components to test")
+
+set(SUPPORTED_TARGETS esp32)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(wifi_station_test)

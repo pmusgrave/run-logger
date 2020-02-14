@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/paul/Documents/code/run-logger/wifi-station/test/build/esp-idf/mbedtls/mbedtls/cmake_install.cmake")
+  include("/home/paul/Documents/code/run-logger/test/build/esp-idf/mbedtls/mbedtls/cmake_install.cmake")
 
 endif()
 

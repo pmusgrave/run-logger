@@ -13,11 +13,11 @@ public:
 	void pause_run(void);
 	void stop_run(void);
 	void reset(void);
-  Run get_current_run();
+	Run* get_current_run();
   
 private:
 	Run current_run;
-  std::vector<Run> log;
+	std::vector<Run> log;
 };
 
 #endif

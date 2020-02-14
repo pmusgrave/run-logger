@@ -1,4 +1,4 @@
-# Install script for directory: /home/paul/Documents/code/run-logger/wifi-station/test/main
+# Install script for directory: /home/paul/Documents/code/run-logger/test/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

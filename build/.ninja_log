@@ -1733,3 +1733,15 @@
 8	19	1581713538	bootloader/bootloader.bin	29b40e4d7efb9e26
 8	19	1581713538	bootloader/bootloader.map	29b40e4d7efb9e26
 19	13375	0	CMakeFiles/flash	9ab93d06329df81b
+0	1739	1581715043	build.ninja	7c84a3d1228f25e
+9	33	1581715043	esp-idf/app_update/CMakeFiles/__idf_app_update.dir/esp_app_desc.c.obj	d27e1cbdd9fa7019
+33	45	1581715043	esp-idf/app_update/libapp_update.a	28d149579455120e
+9	193	1581715043	esp-idf/main/CMakeFiles/__idf_main.dir/station_example_main.cpp.obj	5fd6bdd76cd69247
+193	201	1581715043	esp-idf/main/libmain.a	57d5d4e5f351ba57
+201	637	1581715043	esp-idf/esp32/ld/esp32.project.ld	52a8ef9c55bd44da
+8	745	1581713538	bootloader-prefix/src/bootloader-stamp/bootloader-build	29b40e4d7efb9e26
+8	745	1581713538	bootloader/bootloader.elf	29b40e4d7efb9e26
+8	745	1581713538	bootloader/bootloader.bin	29b40e4d7efb9e26
+8	745	1581713538	bootloader/bootloader.map	29b40e4d7efb9e26
+637	1928	1581715045	wifi_station.elf	3ad51c8d90aaa897
+1928	2064	1581715045	.bin_timestamp	649e6d6074ed3e00

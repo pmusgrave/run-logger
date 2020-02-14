@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/CMakeFiles/bootloader"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/CMakeFiles/bootloader"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/CMakeFiles/bootloader.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/CMakeFiles/bootloader.rule"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/CMakeFiles/bootloader-complete.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/CMakeFiles/bootloader-complete.rule"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
 		},
 		{
-			"file" : "/home/paul/Documents/code/run-logger/wifi-station/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
+			"file" : "/home/paul/Documents/code/run-logger/test/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
 		}
 	],
 	"target" : 

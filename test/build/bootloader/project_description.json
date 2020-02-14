@@ -1,8 +1,8 @@
 {
     "project_name":       "bootloader",
     "project_path":       "/home/paul/esp/esp-idf/components/bootloader/subproject",
-    "build_dir":          "/home/paul/Documents/code/run-logger/wifi-station/test/build/bootloader",
-    "config_file":        "/home/paul/Documents/code/run-logger/wifi-station/test/sdkconfig",
+    "build_dir":          "/home/paul/Documents/code/run-logger/test/build/bootloader",
+    "config_file":        "/home/paul/Documents/code/run-logger/test/sdkconfig",
     "config_defaults":    "",
     "app_elf":            "bootloader.elf",
     "app_bin":            "bootloader.bin",

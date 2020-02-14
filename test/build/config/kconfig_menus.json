@@ -1473,6 +1473,274 @@
                 "children": [
                     {
                         "children": [], 
+                        "depends_on": "<choice EXAMPLE_CONNECT_INTERFACE>", 
+                        "help": null, 
+                        "id": "EXAMPLE_CONNECT_WIFI", 
+                        "name": "EXAMPLE_CONNECT_WIFI", 
+                        "range": null, 
+                        "title": "Wi-Fi", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [], 
+                        "depends_on": "<choice EXAMPLE_CONNECT_INTERFACE>", 
+                        "help": null, 
+                        "id": "EXAMPLE_CONNECT_ETHERNET", 
+                        "name": "EXAMPLE_CONNECT_ETHERNET", 
+                        "range": null, 
+                        "title": "Ethernet", 
+                        "type": "bool"
+                    }
+                ], 
+                "depends_on": null, 
+                "help": "Protocol examples can use Wi-Fi or Ethernet to connect to the network.\nChoose which interface to use.", 
+                "id": "example-connection-configuration-connect-using", 
+                "name": "EXAMPLE_CONNECT_INTERFACE", 
+                "title": "Connect using", 
+                "type": "choice"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_CONNECT_WIFI", 
+                "help": "SSID (network name) for the example to connect to.", 
+                "id": "EXAMPLE_WIFI_SSID", 
+                "name": "EXAMPLE_WIFI_SSID", 
+                "range": null, 
+                "title": "WiFi SSID", 
+                "type": "string"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_CONNECT_WIFI", 
+                "help": "WiFi password (WPA or WPA2) for the example to use.\nCan be left blank if the network has no security set.", 
+                "id": "EXAMPLE_WIFI_PASSWORD", 
+                "name": "EXAMPLE_WIFI_PASSWORD", 
+                "range": null, 
+                "title": "WiFi Password", 
+                "type": "string"
+            }, 
+            {
+                "children": [
+                    {
+                        "children": [], 
+                        "depends_on": "IDF_TARGET_ESP32 && <choice EXAMPLE_USE_ETHERNET>", 
+                        "help": "Select internal Ethernet MAC controller.", 
+                        "id": "EXAMPLE_USE_INTERNAL_ETHERNET", 
+                        "name": "EXAMPLE_USE_INTERNAL_ETHERNET", 
+                        "range": null, 
+                        "title": "Internal EMAC", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [], 
+                        "depends_on": "<choice EXAMPLE_USE_ETHERNET>", 
+                        "help": "Select external SPI-Ethernet module.", 
+                        "id": "EXAMPLE_USE_DM9051", 
+                        "name": "EXAMPLE_USE_DM9051", 
+                        "range": null, 
+                        "title": "DM9051 Module", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [], 
+                        "depends_on": "<choice EXAMPLE_USE_ETHERNET>", 
+                        "help": "When this option is enabled, the example is built with support for\nOpenCores Ethernet MAC, which allows testing the example in QEMU.\nNote that this option is used for internal testing purposes, and\nnot officially supported. Examples built with this option enabled\nwill not run on a real ESP32 chip.", 
+                        "id": "EXAMPLE_USE_OPENETH", 
+                        "name": "EXAMPLE_USE_OPENETH", 
+                        "range": null, 
+                        "title": "OpenCores Ethernet MAC (EXPERIMENTAL)", 
+                        "type": "bool"
+                    }
+                ], 
+                "depends_on": "EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Select which kind of Ethernet will be used in the example.", 
+                "id": "example-connection-configuration-ethernet-type", 
+                "name": "EXAMPLE_USE_ETHERNET", 
+                "title": "Ethernet Type", 
+                "type": "choice"
+            }, 
+            {
+                "children": [
+                    {
+                        "children": [], 
+                        "depends_on": "<choice EXAMPLE_ETH_PHY_MODEL>", 
+                        "help": "IP101 is a single port 10/100 MII/RMII/TP/Fiber Fast Ethernet Transceiver.\nGoto http://www.icplus.com.tw/pp-IP101G.html for more information about it.", 
+                        "id": "EXAMPLE_ETH_PHY_IP101", 
+                        "name": "EXAMPLE_ETH_PHY_IP101", 
+                        "range": null, 
+                        "title": "IP101", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [], 
+                        "depends_on": "<choice EXAMPLE_ETH_PHY_MODEL>", 
+                        "help": "RTL8201F/SR8201F is a single port 10/100Mb Ethernet Transceiver with auto MDIX.\nGoto http://www.corechip-sz.com/productsview.asp?id=22 for more information about it.", 
+                        "id": "EXAMPLE_ETH_PHY_RTL8201", 
+                        "name": "EXAMPLE_ETH_PHY_RTL8201", 
+                        "range": null, 
+                        "title": "RTL8201/SR8201", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [], 
+                        "depends_on": "<choice EXAMPLE_ETH_PHY_MODEL>", 
+                        "help": "LAN8720A is a small footprint RMII 10/100 Ethernet Transceiver with HP Auto-MDIX Support.\nGoto https://www.microchip.com/LAN8720A for more information about it.", 
+                        "id": "EXAMPLE_ETH_PHY_LAN8720", 
+                        "name": "EXAMPLE_ETH_PHY_LAN8720", 
+                        "range": null, 
+                        "title": "LAN8720", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [], 
+                        "depends_on": "<choice EXAMPLE_ETH_PHY_MODEL>", 
+                        "help": "DP83848 is a single port 10/100Mb/s Ethernet Physical Layer Transceiver.\nGoto http://www.ti.com/product/DP83848J for more information about it.", 
+                        "id": "EXAMPLE_ETH_PHY_DP83848", 
+                        "name": "EXAMPLE_ETH_PHY_DP83848", 
+                        "range": null, 
+                        "title": "DP83848", 
+                        "type": "bool"
+                    }
+                ], 
+                "depends_on": "EXAMPLE_USE_INTERNAL_ETHERNET && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Select the Ethernet PHY device to use in the example.", 
+                "id": "example-connection-configuration-ethernet-phy-device", 
+                "name": "EXAMPLE_ETH_PHY_MODEL", 
+                "title": "Ethernet PHY Device", 
+                "type": "choice"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_INTERNAL_ETHERNET && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the GPIO number used by SMI MDC.", 
+                "id": "EXAMPLE_ETH_MDC_GPIO", 
+                "name": "EXAMPLE_ETH_MDC_GPIO", 
+                "range": null, 
+                "title": "SMI MDC GPIO number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_INTERNAL_ETHERNET && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the GPIO number used by SMI MDIO.", 
+                "id": "EXAMPLE_ETH_MDIO_GPIO", 
+                "name": "EXAMPLE_ETH_MDIO_GPIO", 
+                "range": null, 
+                "title": "SMI MDIO GPIO number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_DM9051 && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the SPI host used to communicate with DM9051.", 
+                "id": "EXAMPLE_DM9051_SPI_HOST", 
+                "name": "EXAMPLE_DM9051_SPI_HOST", 
+                "range": null, 
+                "title": "SPI Host Number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_DM9051 && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the GPIO number used by SPI SCLK.", 
+                "id": "EXAMPLE_DM9051_SCLK_GPIO", 
+                "name": "EXAMPLE_DM9051_SCLK_GPIO", 
+                "range": null, 
+                "title": "SPI SCLK GPIO number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_DM9051 && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the GPIO number used by SPI MOSI.", 
+                "id": "EXAMPLE_DM9051_MOSI_GPIO", 
+                "name": "EXAMPLE_DM9051_MOSI_GPIO", 
+                "range": null, 
+                "title": "SPI MOSI GPIO number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_DM9051 && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the GPIO number used by SPI MISO.", 
+                "id": "EXAMPLE_DM9051_MISO_GPIO", 
+                "name": "EXAMPLE_DM9051_MISO_GPIO", 
+                "range": null, 
+                "title": "SPI MISO GPIO number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_DM9051 && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the GPIO number used by SPI CS.", 
+                "id": "EXAMPLE_DM9051_CS_GPIO", 
+                "name": "EXAMPLE_DM9051_CS_GPIO", 
+                "range": null, 
+                "title": "SPI CS GPIO number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_DM9051 && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the clock speed (MHz) of SPI interface.", 
+                "id": "EXAMPLE_DM9051_SPI_CLOCK_MHZ", 
+                "name": "EXAMPLE_DM9051_SPI_CLOCK_MHZ", 
+                "range": null, 
+                "title": "SPI clock speed (MHz)", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_USE_DM9051 && EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the GPIO number used by DM9051 interrupt.", 
+                "id": "EXAMPLE_DM9051_INT_GPIO", 
+                "name": "EXAMPLE_DM9051_INT_GPIO", 
+                "range": null, 
+                "title": "Interrupt GPIO number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set the GPIO number used to reset PHY chip.\nSet to -1 to disable PHY chip hardware reset.", 
+                "id": "EXAMPLE_ETH_PHY_RST_GPIO", 
+                "name": "EXAMPLE_ETH_PHY_RST_GPIO", 
+                "range": null, 
+                "title": "PHY Reset GPIO number", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "EXAMPLE_CONNECT_ETHERNET", 
+                "help": "Set PHY address according your board schematic.", 
+                "id": "EXAMPLE_ETH_PHY_ADDR", 
+                "name": "EXAMPLE_ETH_PHY_ADDR", 
+                "range": null, 
+                "title": "PHY Address", 
+                "type": "int"
+            }, 
+            {
+                "children": [], 
+                "depends_on": "IDF_TARGET_ESP32", 
+                "help": "By default, examples will wait until IPv4 and IPv6 addresses are obtained.\nDisable this option if the network does not support IPv6.", 
+                "id": "EXAMPLE_CONNECT_IPV6", 
+                "name": "EXAMPLE_CONNECT_IPV6", 
+                "range": null, 
+                "title": "Obtain IPv6 link-local address", 
+                "type": "bool"
+            }
+        ], 
+        "depends_on": null, 
+        "id": "example-connection-configuration", 
+        "title": "Example Connection Configuration", 
+        "type": "menu"
+    }, 
+    {
+        "children": [
+            {
+                "children": [
+                    {
+                        "children": [], 
                         "depends_on": "<choice COMPILER_OPTIMIZATION>", 
                         "help": null, 
                         "id": "COMPILER_OPTIMIZATION_DEFAULT", 
@@ -8442,7 +8710,10 @@
                                 "help": "Timeout period configuration for the Task Watchdog Timer in seconds.\nThis is also configurable at run time (see Task Watchdog Timer API Reference)", 
                                 "id": "ESP_TASK_WDT_TIMEOUT_S", 
                                 "name": "ESP_TASK_WDT_TIMEOUT_S", 
-                                "range": null, 
+                                "range": [
+                                    1, 
+                                    60
+                                ], 
                                 "title": "Task Watchdog timeout period (seconds)", 
                                 "type": "int"
                             }, 
