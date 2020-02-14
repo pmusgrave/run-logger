@@ -1,3 +1,6 @@
+#ifndef RUN_HPP
+#define RUN_HPP
+
 #include <ctime>
 
 class Run {
@@ -14,3 +17,5 @@ private:
 	double duration;
 	double distance;
 };
+
+#endif

@@ -19,6 +19,9 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "run.hpp"
+#include "runlogger.hpp"
+
 /* The examples use WiFi configuration that you can set via project configuration menu
 
    If you'd rather not, just change the below entries to strings with
@@ -149,4 +152,6 @@ extern "C" void app_main(void)
     TaskHandle_t xHandle = NULL;
     xTaskCreate( synchronize_log, "SYNCHRONIZE_LOG", 2048, NULL, tskIDLE_PRIORITY, &xHandle );
     configASSERT( xHandle );
+
+    Run test_run;
 }

@@ -1,3 +1,6 @@
+#ifndef RUNLOGGER_HPP
+#define RUNLOGGER_HPP
+
 #include "run.hpp"
 
 // This is the class that handles main UI
@@ -13,3 +16,5 @@ public:
 private:
 	Run current_run;
 };
+
+#endif
