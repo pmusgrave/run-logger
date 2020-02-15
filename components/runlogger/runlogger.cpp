@@ -9,11 +9,3 @@ RunLogger::RunLogger(){
 RunLogger::~RunLogger(){
 	std::cout << "Destructing runlogger" << std::endl;
 }
-
-Run* RunLogger::get_current_run () {
-  return &(this->current_run);
-}
-
-void RunLogger::start_run() {
-  this->current_run.start();
-}

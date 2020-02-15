@@ -277,6 +277,10 @@ extern void test_runlogger_start_run(void);
 extern "C" void app_main(void) {
     initialize_wifi();
     sync_time();
+    std::cout << "Current time before running tests: " << time(0);
+    std::cout << "Entering sleep for 5 seconds" << std::endl;
+    esp_sleep_enable_timer_wakeup(5000000LL);
+    esp_light_sleep_start();
 
     UNITY_BEGIN();
     unity_run_all_tests();
