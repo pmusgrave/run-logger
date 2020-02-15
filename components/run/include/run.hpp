@@ -13,8 +13,9 @@ public:
 	void reset(void);
 	bool is_in_progress(void);
 	bool is_paused(void);
-	double get_duration(void);
-	double get_distance(void);
+	double get_duration(void) const;
+	double get_distance(void) const;
+	Run clone(void) const;
 
 private:
 	bool in_progress;

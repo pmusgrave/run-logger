@@ -9,9 +9,8 @@ public:
 	RunLogger();
 	~RunLogger();
 	Run current_run;
-  
-private:
 	std::vector<Run> log;
+	void complete_run(void);
 };
 
 #endif
