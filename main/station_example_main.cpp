@@ -21,6 +21,7 @@
 
 #include "sntp.h"
 
+#include "driver/gpio.h"
 #include "run.hpp"
 #include "runlogger.hpp"
 
@@ -285,15 +286,29 @@ extern "C" void app_main(void)
         }
     }
 
-    const int deep_sleep_sec = 10;
-    ESP_LOGI(TAG, "Entering deep sleep for %d seconds", deep_sleep_sec);
-    esp_deep_sleep(1000000LL * deep_sleep_sec);
+    //const int deep_sleep_sec = 10;
+    //ESP_LOGI(TAG, "Entering deep sleep for %d seconds", deep_sleep_sec);
+    //esp_deep_sleep(1000000LL * deep_sleep_sec);
     /*************************************************************************/
 
 
     // Initialize task to synchronize logged data
-    TaskHandle_t xHandle = NULL;
-    xTaskCreate( synchronize_log, "SYNCHRONIZE_LOG", 2048, NULL, tskIDLE_PRIORITY, &xHandle );
-    configASSERT( xHandle );
-    Run test_run;
+    // TaskHandle_t xHandle = NULL;
+    // xTaskCreate( synchronize_log, "SYNCHRONIZE_LOG", 2048, NULL, tskIDLE_PRIORITY, &xHandle );
+    // configASSERT( xHandle );
+
+    // testing, blink an LED
+    gpio_pad_select_gpio((gpio_num_t)13);
+    /* Set the GPIO as a push/pull output */
+    gpio_set_direction((gpio_num_t)13, GPIO_MODE_OUTPUT);
+    while(1) {
+        /* Blink off (output low) */
+        printf("Turning off the LED\n");
+        gpio_set_level((gpio_num_t)13, 0);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        /* Blink on (output high) */
+        printf("Turning on the LED\n");
+        gpio_set_level((gpio_num_t)13, 1);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
 }

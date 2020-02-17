@@ -271,16 +271,45 @@ void sync_time() {
     }
 }
 
-extern void test_runlogger_init(void);
-extern void test_runlogger_start_run(void);
+
+#define START_PAUSE_BUTTON 14
+#define ESP_INTR_FLAG_DEFAULT 0
+
+static xQueueHandle gpio_evt_queue = NULL;
+
+static void IRAM_ATTR gpio_isr_handler(void* arg)
+{
+    uint32_t gpio_num = (uint32_t) arg;
+    xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+}
+
+static void handle_start_pause_button(void* arg) {
+    uint32_t io_num;
+    while (1) {
+        if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+            printf("GPIO[%d] intr, val: %d\n", (gpio_num_t)io_num, gpio_get_level((gpio_num_t)io_num));
+        }
+    }
+}   
 
 extern "C" void app_main(void) {
     initialize_wifi();
     sync_time();
-    std::cout << "Current time before running tests: " << time(0);
-    std::cout << "Entering sleep for 5 seconds" << std::endl;
-    esp_sleep_enable_timer_wakeup(5000000LL);
-    esp_light_sleep_start();
+
+    std::cout << "Initializing I/O" << std::endl;
+    // configure start/pause button
+    gpio_config_t io_conf;
+    io_conf.intr_type = (gpio_int_type_t)GPIO_PIN_INTR_NEGEDGE;
+    io_conf.pin_bit_mask = (1ULL<<START_PAUSE_BUTTON);
+    io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pull_up_en = (gpio_pullup_t)1;
+    gpio_config(&io_conf);
+
+    gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+    xTaskCreate(handle_start_pause_button, "handle_start_pause_button", 2048, NULL, 10, NULL);
+
+    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+    gpio_isr_handler_add((gpio_num_t)START_PAUSE_BUTTON, gpio_isr_handler, (void*) (gpio_num_t)START_PAUSE_BUTTON);
 
     UNITY_BEGIN();
     unity_run_all_tests();

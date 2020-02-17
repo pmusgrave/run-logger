@@ -11,13 +11,17 @@ TEST_CASE("Runlogger class initialization", "[runlogger]") {
 	TEST_ASSERT_EQUAL(0, test_logger.current_run.get_distance());
 }
 
+TEST_CASE("GPIO initialization and handling", "[runlogger]") {
+	RunLogger test_logger;
+}
+
 TEST_CASE("Runlogger stop", "[runlogger]") {
 	RunLogger test_logger;
 	Run* test_run = &test_logger.current_run;
 
 	test_run->start();
 
-	std::cout << "Entering sleep for 1 second" << std::endl;
+	// std::cout << "Entering sleep for 1 second" << std::endl;
 	esp_sleep_enable_timer_wakeup(1000000LL);
 	esp_light_sleep_start();
 
@@ -29,4 +33,19 @@ TEST_CASE("Runlogger stop", "[runlogger]") {
 	TEST_ASSERT_EQUAL(last_run.get_duration(), test_run->get_duration());
 	TEST_ASSERT_EQUAL(last_run.get_distance(), test_run->get_distance());
 	TEST_ASSERT_EQUAL(1, test_logger.log.size());
+}
+
+TEST_CASE("Runlogger push to cloud", "[runlogger]") {
+	RunLogger test_logger;
+	Run* test_run = &test_logger.current_run;
+
+	test_run->start();
+
+	// std::cout << "Entering sleep for 1 second" << std::endl;
+	esp_sleep_enable_timer_wakeup(1000000LL);
+	esp_light_sleep_start();
+
+	test_logger.complete_run();
+
+	Run& last_run = test_logger.log.back();
 }
