@@ -284,15 +284,7 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
-// This function borrowed from Kolban
-// https://github.com/nkolban/esp32-snippets/blob/master/c-utils/c_timeutils.c
-uint32_t timeval_toMsecs(struct timeval *a) {
-    return a->tv_sec * 1000 + a->tv_usec/1000;
-} // timeval_toMsecs
-
-// This function borrowed from Kolban
-// https://github.com/nkolban/esp32-snippets/blob/master/c-utils/c_timeutils.c
-struct timeval timeval_sub(struct timeval *a, struct timeval *b) {
+int32_t get_diff_ms(struct timeval *a, struct timeval *b) {
     struct timeval result;
     result.tv_sec = a->tv_sec - b->tv_sec;
     result.tv_usec = a->tv_usec - b->tv_usec;
@@ -300,48 +292,35 @@ struct timeval timeval_sub(struct timeval *a, struct timeval *b) {
         result.tv_sec -= 1;
         result.tv_usec += 1000000;
     }
-    return result;
-} // timeval_sub
-
-// This function borrowed from Kolban
-// https://github.com/nkolban/esp32-snippets/blob/master/c-utils/c_timeutils.c
-uint32_t timeval_durationBeforeNow(struct timeval *a) {
-    struct timeval b;
-    gettimeofday(&b, NULL);
-    struct timeval delta = timeval_sub(&b, a);
-    if (delta.tv_sec < 0) {
-        return 0;
-    }
-    return timeval_toMsecs(&delta);
-} // timeval_durationBeforeNow
+    return (result.tv_sec * 1000 + (result.tv_usec / 1000));
+}
 
 static void handle_start_pause_button(void* arg) {
     struct timeval last_press;
+    struct timeval now;
     gettimeofday(&last_press, NULL);
     uint32_t io_num;
     int button_state = 1;
-    struct timeval now;
-    uint32_t diff;
+    int32_t diff;
 
     while (1) {
-        BaseType_t button_state = xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY);
-        gettimeofday(&now, NULL);
-        diff = timeval_durationBeforeNow(&last_press);
-        printf("%ld\n", (long int)diff);
-        if (diff > 100) {
-            printf("debounced press\n");
+        if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+            gettimeofday(&now, NULL);
+            diff = get_diff_ms(&now, &last_press);
+            
+            button_state = gpio_get_level((gpio_num_t)io_num);
+            if ( (button_state == 0) && ( diff > 1000 ) ) {
+                printf("GPIO[%d] intr, val: %d\n", (gpio_num_t)io_num, button_state);
+                // gpio_set_level((gpio_num_t)13, 1);
+                last_press = now;
+            }
+            else {
+                printf("%d\n", diff);
+            }
+            vTaskDelay(1);
         }
-        last_press = now;
-        // if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-        //     button_state = gpio_get_level((gpio_num_t)io_num);
-        //     if (button_state == 0) {
-        //         printf("GPIO[%d] intr, val: %d\n", (gpio_num_t)io_num, button_state);
-        //         gpio_set_level((gpio_num_t)13, 1);    
-        //     }
-        //     vTaskDelay(10);
-        // }
     }
-}   
+}
 
 extern "C" void app_main(void) {
     initialize_wifi();
