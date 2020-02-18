@@ -12,6 +12,7 @@
 */
 #include <string.h>
 #include "freertos/FreeRTOS.h"
+#include <freertos/queue.h>
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
 #include "esp_system.h"
@@ -30,8 +31,8 @@
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      ""
-#define EXAMPLE_ESP_WIFI_PASS      ""
+#define EXAMPLE_ESP_WIFI_SSID      "DNABITUN"
+#define EXAMPLE_ESP_WIFI_PASS      "m1aL2k3um#"
 #define EXAMPLE_ESP_MAXIMUM_RETRY  5
 
 /* FreeRTOS event group to signal when we are connected*/
@@ -283,12 +284,62 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
+// This function borrowed from Kolban
+// https://github.com/nkolban/esp32-snippets/blob/master/c-utils/c_timeutils.c
+uint32_t timeval_toMsecs(struct timeval *a) {
+    return a->tv_sec * 1000 + a->tv_usec/1000;
+} // timeval_toMsecs
+
+// This function borrowed from Kolban
+// https://github.com/nkolban/esp32-snippets/blob/master/c-utils/c_timeutils.c
+struct timeval timeval_sub(struct timeval *a, struct timeval *b) {
+    struct timeval result;
+    result.tv_sec = a->tv_sec - b->tv_sec;
+    result.tv_usec = a->tv_usec - b->tv_usec;
+    if (a->tv_usec < b->tv_usec) {
+        result.tv_sec -= 1;
+        result.tv_usec += 1000000;
+    }
+    return result;
+} // timeval_sub
+
+// This function borrowed from Kolban
+// https://github.com/nkolban/esp32-snippets/blob/master/c-utils/c_timeutils.c
+uint32_t timeval_durationBeforeNow(struct timeval *a) {
+    struct timeval b;
+    gettimeofday(&b, NULL);
+    struct timeval delta = timeval_sub(&b, a);
+    if (delta.tv_sec < 0) {
+        return 0;
+    }
+    return timeval_toMsecs(&delta);
+} // timeval_durationBeforeNow
+
 static void handle_start_pause_button(void* arg) {
+    struct timeval last_press;
+    gettimeofday(&last_press, NULL);
     uint32_t io_num;
+    int button_state = 1;
+    struct timeval now;
+    uint32_t diff;
+
     while (1) {
-        if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-            printf("GPIO[%d] intr, val: %d\n", (gpio_num_t)io_num, gpio_get_level((gpio_num_t)io_num));
+        BaseType_t button_state = xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY);
+        gettimeofday(&now, NULL);
+        diff = timeval_durationBeforeNow(&last_press);
+        printf("%ld\n", (long int)diff);
+        if (diff > 100) {
+            printf("debounced press\n");
         }
+        last_press = now;
+        // if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+        //     button_state = gpio_get_level((gpio_num_t)io_num);
+        //     if (button_state == 0) {
+        //         printf("GPIO[%d] intr, val: %d\n", (gpio_num_t)io_num, button_state);
+        //         gpio_set_level((gpio_num_t)13, 1);    
+        //     }
+        //     vTaskDelay(10);
+        // }
     }
 }   
 
@@ -304,6 +355,9 @@ extern "C" void app_main(void) {
     io_conf.mode = GPIO_MODE_INPUT;
     io_conf.pull_up_en = (gpio_pullup_t)1;
     gpio_config(&io_conf);
+
+    gpio_pad_select_gpio((gpio_num_t)13);
+    gpio_set_direction((gpio_num_t)13, GPIO_MODE_OUTPUT);
 
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     xTaskCreate(handle_start_pause_button, "handle_start_pause_button", 2048, NULL, 10, NULL);

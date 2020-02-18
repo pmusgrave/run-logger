@@ -2,10 +2,6 @@
 #define RUNLOGGER_HPP
 
 #include "run.hpp"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "driver/gpio.h"
 #include <vector>
 
 class RunLogger {
