@@ -43,8 +43,10 @@ void Run::reset(void) {
 }
 
 void Run::stop(void) {
+	if(!paused){
+		pause();
+	}
 	in_progress = false;
-	pause();
 }
 
 bool Run::is_in_progress(void) {
