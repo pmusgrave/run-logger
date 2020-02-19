@@ -4,7 +4,10 @@
 #include "run.hpp"
 #include <vector>
 
-#define START_PAUSE_BUTTON 14
+#define LED 13
+#define START_PAUSE_BUTTON 14 // subject to change
+#define STOP_PAUSE_BUTTON 15 // subject to change
+#define RESET_PAUSE_BUTTON 16 // subject to change
 
 enum app_state {RESET, RUN_IN_PROGRESS, PAUSED, STOPPED};
 
@@ -21,7 +24,7 @@ public:
 	void handle_reset_button(void);
 	
 private:
-	uint8_t state;
+	volatile uint8_t state;
 	void push_data_to_cloud(void);
 };
 

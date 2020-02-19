@@ -62,3 +62,5 @@ $<TARGET_FILE:__idf_main>
 $<TARGET_FILE:__idf_run>
 $<TARGET_FILE:__idf_runlogger>
 $<TARGET_FILE:__idf_protocol_examples_common>
+$<TARGET_FILE:__run_test>
+$<TARGET_FILE:__runlogger_test>

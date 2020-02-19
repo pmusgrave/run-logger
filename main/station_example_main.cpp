@@ -213,6 +213,125 @@ static void initialize_sntp(void)
 }
 /*****************************************************************************/
 
+
+
+
+#define ESP_INTR_FLAG_DEFAULT 0
+
+RunLogger app;
+static xQueueHandle start_evt_queue = NULL;
+static xQueueHandle stop_evt_queue = NULL;
+static xQueueHandle reset_evt_queue = NULL;
+
+static void IRAM_ATTR gpio_isr_handler(void* arg)
+{
+    uint32_t gpio_num = (uint32_t) arg;
+    switch(gpio_num) {
+    case START_PAUSE_BUTTON:
+        xQueueSendFromISR(start_evt_queue, &gpio_num, NULL);    
+        break;
+    case STOP_PAUSE_BUTTON:
+        xQueueSendFromISR(stop_evt_queue, &gpio_num, NULL);    
+        break;
+    case RESET_PAUSE_BUTTON:
+        xQueueSendFromISR(reset_evt_queue, &gpio_num, NULL);    
+        break;
+    }
+}
+
+int32_t get_diff_ms(struct timeval *a, struct timeval *b) {
+    struct timeval result;
+    result.tv_sec = a->tv_sec - b->tv_sec;
+    result.tv_usec = a->tv_usec - b->tv_usec;
+    if (a->tv_usec < b->tv_usec) {
+        result.tv_sec -= 1;
+        result.tv_usec += 1000000;
+    }
+    return (result.tv_sec * 1000 + (result.tv_usec / 1000));
+}
+
+static void blink(void* arg) {
+    while(1) {
+        if (app.get_state() == PAUSED) {
+            gpio_set_level((gpio_num_t)LED, 0);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+            gpio_set_level((gpio_num_t)LED, 1);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+        }
+        else {
+            gpio_set_level((gpio_num_t)LED, 0);
+        }
+    }
+}
+
+static void start_button_task(void* arg) {
+    struct timeval last_press;
+    struct timeval now;
+    gettimeofday(&last_press, NULL);
+    uint32_t io_num;
+    int button_state = 1;
+    int32_t diff;
+
+    while (1) {
+        if(xQueueReceive(start_evt_queue, &io_num, portMAX_DELAY)) {
+            if (io_num == START_PAUSE_BUTTON) {
+                gettimeofday(&now, NULL);
+                diff = get_diff_ms(&now, &last_press);
+                button_state = gpio_get_level((gpio_num_t)io_num);
+                if ( (button_state == 0) && ( diff > 1000 ) ) {
+                    app.handle_start_pause_button();
+                    last_press = now;
+                }
+                vTaskDelay(1);    
+            }
+        }
+    }
+}
+
+static void stop_button_task(void* arg) {
+    struct timeval last_press;
+    struct timeval now;
+    gettimeofday(&last_press, NULL);
+    uint32_t io_num;
+    int button_state = 1;
+    int32_t diff;
+
+    while (1) {
+        if(xQueueReceive(stop_evt_queue, &io_num, portMAX_DELAY)) {
+            gettimeofday(&now, NULL);
+            diff = get_diff_ms(&now, &last_press);
+            button_state = gpio_get_level((gpio_num_t)io_num);
+            if ( (button_state == 0) && ( diff > 1000 ) ) {
+                app.handle_stop_button();
+                last_press = now;
+            }
+            vTaskDelay(1);
+        }
+    }
+}
+
+static void reset_button_task(void* arg) {
+    struct timeval last_press;
+    struct timeval now;
+    gettimeofday(&last_press, NULL);
+    uint32_t io_num;
+    int button_state = 1;
+    int32_t diff;
+
+    while (1) {
+        if(xQueueReceive(reset_evt_queue, &io_num, portMAX_DELAY)) {
+            gettimeofday(&now, NULL);
+            diff = get_diff_ms(&now, &last_press);
+            button_state = gpio_get_level((gpio_num_t)io_num);
+            if ( (button_state == 0) && ( diff > 1000 ) ) {
+                app.handle_reset_button();
+                last_press = now;
+            }
+            vTaskDelay(1);
+        }
+    }
+}
+
 extern "C" void app_main(void)
 {
     //Initialize NVS
@@ -292,23 +411,20 @@ extern "C" void app_main(void)
     /*************************************************************************/
 
 
+    app.init_io();
+
+    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+    gpio_isr_handler_add((gpio_num_t)START_PAUSE_BUTTON, gpio_isr_handler, (void*) (gpio_num_t)START_PAUSE_BUTTON);
+    start_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+    stop_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+    reset_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+    xTaskCreate(blink, "blink", 2048, NULL, 10, NULL);
+    xTaskCreate(start_button_task, "start_button", 2048, NULL, 10, NULL);
+    xTaskCreate(stop_button_task, "start_button", 2048, NULL, 10, NULL);
+    xTaskCreate(reset_button_task, "start_button", 2048, NULL, 10, NULL);
+
     // Initialize task to synchronize logged data
     // TaskHandle_t xHandle = NULL;
     // xTaskCreate( synchronize_log, "SYNCHRONIZE_LOG", 2048, NULL, tskIDLE_PRIORITY, &xHandle );
     // configASSERT( xHandle );
-
-    // testing, blink an LED
-    gpio_pad_select_gpio((gpio_num_t)13);
-    /* Set the GPIO as a push/pull output */
-    gpio_set_direction((gpio_num_t)13, GPIO_MODE_OUTPUT);
-    while(1) {
-        /* Blink off (output low) */
-        printf("Turning off the LED\n");
-        gpio_set_level((gpio_num_t)13, 0);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        /* Blink on (output high) */
-        printf("Turning on the LED\n");
-        gpio_set_level((gpio_num_t)13, 1);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
 }

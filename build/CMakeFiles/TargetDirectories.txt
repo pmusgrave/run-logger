@@ -552,3 +552,17 @@
 /home/paul/Documents/code/run-logger/build/esp-idf/protocol_examples_common/CMakeFiles/list_install_components.dir
 /home/paul/Documents/code/run-logger/build/esp-idf/protocol_examples_common/CMakeFiles/install/local.dir
 /home/paul/Documents/code/run-logger/build/esp-idf/protocol_examples_common/CMakeFiles/install.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/run_test/CMakeFiles/install/strip.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/run_test/CMakeFiles/edit_cache.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/run_test/CMakeFiles/__run_test.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/run_test/CMakeFiles/list_install_components.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/run_test/CMakeFiles/install/local.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/run_test/CMakeFiles/rebuild_cache.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/run_test/CMakeFiles/install.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/runlogger_test/CMakeFiles/install/strip.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/runlogger_test/CMakeFiles/edit_cache.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/runlogger_test/CMakeFiles/__runlogger_test.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/runlogger_test/CMakeFiles/rebuild_cache.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/runlogger_test/CMakeFiles/list_install_components.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/runlogger_test/CMakeFiles/install/local.dir
+/home/paul/Documents/code/run-logger/build/esp-idf/runlogger_test/CMakeFiles/install.dir

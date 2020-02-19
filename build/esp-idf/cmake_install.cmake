@@ -106,6 +106,8 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/paul/Documents/code/run-logger/build/esp-idf/run/cmake_install.cmake")
   include("/home/paul/Documents/code/run-logger/build/esp-idf/runlogger/cmake_install.cmake")
   include("/home/paul/Documents/code/run-logger/build/esp-idf/protocol_examples_common/cmake_install.cmake")
+  include("/home/paul/Documents/code/run-logger/build/esp-idf/run_test/cmake_install.cmake")
+  include("/home/paul/Documents/code/run-logger/build/esp-idf/runlogger_test/cmake_install.cmake")
 
 endif()
 

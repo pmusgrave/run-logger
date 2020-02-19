@@ -41,7 +41,7 @@ void RunLogger::handle_start_pause_button(void){
 	switch(state) {
 	case RESET:
 		current_run.start();
-		state = RUN_IN_PROGRESS;	
+		state = RUN_IN_PROGRESS;
 		break;
 	case RUN_IN_PROGRESS:
 		current_run.pause();
@@ -50,6 +50,7 @@ void RunLogger::handle_start_pause_button(void){
 	case PAUSED:
 		current_run.start();
 		state = RUN_IN_PROGRESS;
+		break;
 	case STOPPED:
 		// what should happen here? Reset then start?
 		this->handle_reset_button();
@@ -89,6 +90,7 @@ void RunLogger::handle_stop_button(void){
 void RunLogger::handle_reset_button(void){
 	current_run.reset();
 	state = RESET;
+	std::cout << state << std::endl;
 }
 
 void RunLogger::push_data_to_cloud(void) {
