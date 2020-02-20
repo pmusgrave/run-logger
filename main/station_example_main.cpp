@@ -280,7 +280,12 @@ static void start_button_task(void* arg) {
                 diff = get_diff_ms(&now, &last_press);
                 button_state = gpio_get_level((gpio_num_t)io_num);
                 if ( (button_state == 0) && ( diff > 1000 ) ) {
-                    std::cout << app.current_run.get_duration() << std::endl;
+                    std::cout << "Time: "
+                        << app.current_run.get_duration().tv_sec
+                        << "."
+                        << app.current_run.get_duration().tv_usec 
+                        << " seconds"
+                        << std::endl;
                     app.handle_start_pause_button();
                     last_press = now;
                 }
