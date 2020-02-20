@@ -21,6 +21,7 @@
 
 #include "sntp.h"
 
+#include <iostream>
 #include "driver/gpio.h"
 #include "run.hpp"
 #include "runlogger.hpp"
@@ -279,6 +280,7 @@ static void start_button_task(void* arg) {
                 diff = get_diff_ms(&now, &last_press);
                 button_state = gpio_get_level((gpio_num_t)io_num);
                 if ( (button_state == 0) && ( diff > 1000 ) ) {
+                    std::cout << app.current_run.get_duration() << std::endl;
                     app.handle_start_pause_button();
                     last_press = now;
                 }

@@ -13,19 +13,19 @@ public:
 	void reset(void);
 	bool is_in_progress(void);
 	bool is_paused(void);
-	double get_duration(void) const;
+	struct timeval get_duration(void) const;
 	double get_distance(void) const;
 	Run clone(void) const;
 
 private:
 	bool in_progress;
 	bool paused;
-	time_t run_start_time;
-	time_t most_recent_start_time;
-	time_t most_recent_pause_time;
-	double duration;
+	struct timeval run_start_time;
+	struct timeval most_recent_start_time;
+	struct timeval most_recent_pause_time;
+	struct timeval duration;
+	struct timeval total_paused_duration;
 	double distance;
-	double total_paused_duration;
 };
 
 #endif

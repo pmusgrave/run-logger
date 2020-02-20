@@ -10,15 +10,18 @@ Run::~Run() {}
 void Run::start(void) {
 	in_progress = true;
 	paused = false;
-	time_t current_time = time(NULL);
+	struct timeval current_time;
+	gettimeofday(&current_time, NULL);
 
-	if (duration == 0.0) {
+	if (duration.tv_sec == 0.0 && duration.tv_usec == 0.0) {
 		run_start_time = current_time;
 		most_recent_pause_time = current_time;
 	}
 	most_recent_start_time = current_time;
 
-	total_paused_duration += (current_time - most_recent_pause_time);
+	struct timeval timediff;
+	timersub(&current_time, &most_recent_pause_time, &timediff);
+	timeradd(&total_paused_duration, &timediff, &total_paused_duration);
 	// std::cout << "Starting run. Current time: "
 	// 	<< asctime(gmtime(&current_time))
 	// 	<< std::endl;
@@ -26,20 +29,23 @@ void Run::start(void) {
 
 void Run::pause(void) {
 	paused = true;
-	time_t current_time = time(NULL);
+	struct timeval current_time;
+	gettimeofday(&current_time, NULL);
 	most_recent_pause_time = current_time;
-	duration += current_time - most_recent_start_time;
+	struct timeval timediff;
+	timersub(&current_time, &most_recent_start_time, &timediff);
+	timeradd(&duration, &timediff, &duration);
 }
 
 void Run::reset(void) {
 	in_progress = false;
 	paused = true;
-	run_start_time = 0;
-	duration = 0.0;
+	timerclear(&run_start_time);
+	timerclear(&duration);
+	timerclear(&total_paused_duration);
+	timerclear(&most_recent_start_time);
+	timerclear(&most_recent_pause_time);
 	distance = 0.0;
-	total_paused_duration = 0.0;
-	most_recent_start_time = 0.0;
-	most_recent_pause_time = 0.0;
 }
 
 void Run::stop(void) {
@@ -57,11 +63,14 @@ bool Run::is_paused(void) {
 	return paused;
 }
 
-double Run::get_duration(void) const {
+struct timeval Run::get_duration(void) const {
 	if ( in_progress && (!paused) )  {
-		time_t current_time = time(NULL);
-		time_t current_duration = current_time - run_start_time;
-	    return current_duration - total_paused_duration;	
+		struct timeval current_time;
+		gettimeofday(&current_time, NULL);
+		struct timeval current_duration;
+		timersub(&current_time, &run_start_time, &current_duration);
+		timersub(&current_duration, &total_paused_duration, &current_duration);
+	    return current_duration;	
 	}
 	else {
 		return duration;
