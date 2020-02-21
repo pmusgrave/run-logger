@@ -131,18 +131,20 @@ function pushEvent(auth, message) {
 }
 
 function push_run_data(auth) {
-  client.on('connect', function () {
-    client.subscribe('run', function (err) {
-      if (!err) {
-        // client.publish('run', 'Hello mqtt')
-        console.log("Connected to MQTT broker.")
-      }
-    })
-  })
-   
+  console.log("authenticated");
+     
   client.on('message', function (topic, message) {
     console.log(message.toString())
     pushEvent(auth, message);
     // client.end()
   })
 }
+
+client.on('connect', function () {
+  client.subscribe('run', function (err) {
+    if (!err) {
+      // client.publish('run', 'Hello mqtt')
+      console.log("Connected to MQTT broker.")
+    }
+  })
+})
