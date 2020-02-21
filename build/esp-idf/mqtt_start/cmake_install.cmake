@@ -1,4 +1,4 @@
-# Install script for directory: /home/paul/Documents/code/run-logger/components/sntp
+# Install script for directory: /home/paul/Documents/code/run-logger/components/mqtt_start
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

@@ -3,7 +3,7 @@ const readline = require('readline');
 const {google} = require('googleapis');
 
 var mqtt = require('mqtt');
-var client  = mqtt.connect('mqtt://192.168.200.164');
+var client  = mqtt.connect('mqtt://raspberrypi3bp');
 
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
@@ -132,6 +132,6 @@ function push_run_data(auth) {
   client.on('message', function (topic, message) {
     console.log(message.toString())
     pushEvent(auth, message);
-    client.end()
+    // client.end()
   })
 }

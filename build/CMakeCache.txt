@@ -235,7 +235,7 @@ PYTHON_DEPS_CHECKED:UNINITIALIZED=1
 PYTHON_EXECUTABLE:FILEPATH=/home/paul/.espressif/python_env/idf4.1_py2.7_env/bin/python
 
 //List of components to test
-TEST_COMPONENTS:STRING=run;runlogger
+TEST_COMPONENTS:STRING=run;runlogger;mqtt_start
 
 //Allow unsafe builds. These builds ARE NOT SECURE.
 UNSAFE_BUILD:BOOL=OFF
@@ -370,6 +370,9 @@ __idf_mdns_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__i
 __idf_mqtt_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
 
 //Dependencies for the target
+__idf_mqtt_start_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
+
+//Dependencies for the target
 __idf_newlib_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
 
 //Dependencies for the target
@@ -404,9 +407,6 @@ __idf_runlogger_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;genera
 
 //Dependencies for the target
 __idf_sdmmc_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
-
-//Dependencies for the target
-__idf_sntp_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
 
 //Dependencies for the target
 __idf_soc_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
@@ -583,7 +583,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=79
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=80
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

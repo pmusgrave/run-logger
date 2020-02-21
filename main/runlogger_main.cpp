@@ -1,3 +1,13 @@
+#include <iostream>
+#include "driver/gpio.h"
+#include "run.hpp"
+#include "runlogger.hpp"
+#include "sntp.h"
+extern "C" {
+    #include "mqtt_start.h"    
+}
+
+
 /* WiFi station Example
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
@@ -19,13 +29,6 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#include "sntp.h"
-
-#include <iostream>
-#include "driver/gpio.h"
-#include "run.hpp"
-#include "runlogger.hpp"
-
 /* The examples use WiFi configuration that you can set via project configuration menu
 
    If you'd rather not, just change the below entries to strings with
@@ -44,7 +47,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
 
-static const char *TAG = "wifi station";
+static const char *TAG = "runlogger";
 
 static int s_retry_num = 0;
 
@@ -129,16 +132,6 @@ void wifi_init_sta(void)
     vEventGroupDelete(s_wifi_event_group);
 }
 
-void synchronize_log(void* pvParameter) {
-    while (1) {
-        if (on_wifi) {
-                
-        }
-
-        vTaskDelay(50);
-    }
-}
-
 /******************************************************************************
 *   SNTP EXAMPLE SOURCE
 ******************************************************************************/
@@ -198,7 +191,7 @@ static void obtain_time(void)
     time(&now);
     localtime_r(&now, &timeinfo);
 
-    ESP_ERROR_CHECK( example_disconnect() );
+    // ESP_ERROR_CHECK( example_disconnect() );
 }
 
 static void initialize_sntp(void)
@@ -214,12 +207,10 @@ static void initialize_sntp(void)
 }
 /*****************************************************************************/
 
-
-
-
 #define ESP_INTR_FLAG_DEFAULT 0
 
 RunLogger app;
+esp_mqtt_client_handle_t mqtt_client;
 static xQueueHandle start_evt_queue = NULL;
 static xQueueHandle stop_evt_queue = NULL;
 static xQueueHandle reset_evt_queue = NULL;
@@ -262,6 +253,7 @@ static void blink(void* arg) {
         else {
             gpio_set_level((gpio_num_t)LED, 0);
         }
+        taskYIELD();
     }
 }
 
@@ -289,7 +281,10 @@ static void start_button_task(void* arg) {
                     app.handle_start_pause_button();
                     last_press = now;
                 }
-                vTaskDelay(1);    
+
+                ESP_LOGI(TAG, "[MQTT] Publishing a test run...");
+                esp_mqtt_client_publish(mqtt_client, "run", "test", 0, 0, 0);
+                taskYIELD();    
             }
         }
     }
@@ -312,7 +307,7 @@ static void stop_button_task(void* arg) {
                 app.handle_stop_button();
                 last_press = now;
             }
-            vTaskDelay(1);
+            taskYIELD();
         }
     }
 }
@@ -334,8 +329,18 @@ static void reset_button_task(void* arg) {
                 app.handle_reset_button();
                 last_press = now;
             }
-            vTaskDelay(1);
+            taskYIELD();
         }
+    }
+}
+
+void synchronize_log(void* pvParameter) {
+    while (1) {
+        if (on_wifi) {
+                
+        }
+
+        vTaskDelay(50);
     }
 }
 
@@ -417,6 +422,7 @@ extern "C" void app_main(void)
     //esp_deep_sleep(1000000LL * deep_sleep_sec);
     /*************************************************************************/
 
+    mqtt_start(&mqtt_client);
 
     app.init_io();
 
@@ -426,7 +432,7 @@ extern "C" void app_main(void)
     stop_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     reset_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     xTaskCreate(blink, "blink", 2048, NULL, 10, NULL);
-    xTaskCreate(start_button_task, "start_button", 2048, NULL, 10, NULL);
+    xTaskCreate(start_button_task, "start_button", 4096, NULL, 10, NULL);
     xTaskCreate(stop_button_task, "start_button", 2048, NULL, 10, NULL);
     xTaskCreate(reset_button_task, "start_button", 2048, NULL, 10, NULL);
 
