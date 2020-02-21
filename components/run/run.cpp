@@ -63,6 +63,10 @@ bool Run::is_paused(void) {
 	return paused;
 }
 
+struct tm Run::get_start_date(void) const {
+	return *localtime(&run_start_time.tv_sec);
+}
+
 struct timeval Run::get_duration(void) const {
 	if ( in_progress && (!paused) )  {
 		struct timeval current_time;

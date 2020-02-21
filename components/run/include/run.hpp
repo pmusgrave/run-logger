@@ -13,6 +13,7 @@ public:
 	void reset(void);
 	bool is_in_progress(void);
 	bool is_paused(void);
+	struct tm get_start_date(void) const;
 	struct timeval get_duration(void) const;
 	double get_distance(void) const;
 	Run clone(void) const;

@@ -92,18 +92,28 @@ function listEvents(auth) {
 }
 
 function pushEvent(auth, message) {
+  const run_data = JSON.parse(message);
+  const minutes = Math.floor(run_data.duration / 60);
+  const seconds = run_data.duration - (minutes * 60);
+  console.log(run_data.distance);
+  console.log(run_data.duration);
+  console.log(minutes, seconds);
+  let event_string = "running / " 
+    + run_data.distance.toString() + "mi"
+    + " / "
+    + minutes.toString() + "min "
+    + seconds.toPrecision(2).toString() + "s ";
+
   const calendar = google.calendar({version: 'v3', auth});
-  var event = {
-    'summary': message.toString(),
-    'location': '800 Howard St., San Francisco, CA 94103',
-    'description': 'A chance to hear more about Google\'s developer products.',
+  let event = {
+    'summary': event_string,
     'start': {
-      'dateTime': '2020-02-20T09:00:00-07:00',
-      'timeZone': 'America/Los_Angeles',
+      'date': run_data.date,
+      'timeZone': 'America/New_York',
     },
     'end': {
-      'dateTime': '2020-02-20T17:00:00-07:00',
-      'timeZone': 'America/Los_Angeles',
+      'date': run_data.date,
+      'timeZone': 'America/New_York',
     },
   };
 
@@ -124,7 +134,8 @@ function push_run_data(auth) {
   client.on('connect', function () {
     client.subscribe('run', function (err) {
       if (!err) {
-        client.publish('run', 'Hello mqtt')
+        // client.publish('run', 'Hello mqtt')
+        console.log("Connected to MQTT broker.")
       }
     })
   })

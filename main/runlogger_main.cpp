@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "driver/gpio.h"
 #include "run.hpp"
 #include "runlogger.hpp"
@@ -265,6 +266,9 @@ static void start_button_task(void* arg) {
     int button_state = 1;
     int32_t diff;
 
+    //testing
+    Run data;
+    ///
     while (1) {
         if(xQueueReceive(start_evt_queue, &io_num, portMAX_DELAY)) {
             if (io_num == START_PAUSE_BUTTON) {
@@ -280,13 +284,39 @@ static void start_button_task(void* arg) {
                         << std::endl;
                     app.handle_start_pause_button();
                     last_press = now;
-                }
 
-                ESP_LOGI(TAG, "[MQTT] Publishing a test run...");
-                esp_mqtt_client_publish(mqtt_client, "run", "test", 0, 0, 0);
-                taskYIELD();    
+
+                    // TESTING
+                    ESP_LOGI(TAG, "Synchronizing data...");
+                    data = app.current_run;
+                    struct tm date_local_time = data.get_start_date();
+                    char buffer[100];
+                    sprintf(buffer, "%04d-%02d-%02d", 
+                        date_local_time.tm_year + 1900,
+                        date_local_time.tm_mon + 1,
+                        date_local_time.tm_mday);
+                    std::string date(buffer);
+                    std::string output_message = 
+                        std::string("{\n\t")
+                        + "\"date\":"
+                        + " \"" + date + "\""
+                        + ",\n\t"
+                        + "\"distance\": "
+                        + std::to_string(data.get_distance())
+                        + ",\n\t"
+                        + "\"duration\": "
+                        + std::to_string(data.get_duration().tv_sec)
+                        + "."
+                        + std::to_string(data.get_duration().tv_sec)
+                        + "\n}";
+                    
+                    ESP_LOGI(TAG, "Publishing run data via MQTT...");
+                    esp_mqtt_client_publish(mqtt_client, "run", output_message.c_str(), 0, 0, 0);
+                    ////
+                }
             }
         }
+        taskYIELD();
     }
 }
 
@@ -307,8 +337,8 @@ static void stop_button_task(void* arg) {
                 app.handle_stop_button();
                 last_press = now;
             }
-            taskYIELD();
         }
+        taskYIELD();
     }
 }
 
@@ -329,18 +359,34 @@ static void reset_button_task(void* arg) {
                 app.handle_reset_button();
                 last_press = now;
             }
-            taskYIELD();
         }
+        taskYIELD();
     }
 }
 
 void synchronize_log(void* pvParameter) {
+    Run data;
     while (1) {
-        if (on_wifi) {
-                
+        if (on_wifi && app.log.size() > 0) {
+            ESP_LOGI(TAG, "Synchronizing data...");
+            data = app.log.back();
+            std::string output_message = 
+                std::string("{\n\t")
+                + "distance: "
+                + std::to_string(data.get_distance())
+                + ",\n\t"
+                + "duration: "
+                + std::to_string(data.get_duration().tv_sec)
+                + "."
+                + std::to_string(data.get_duration().tv_sec)
+                + "\n}";
+            
+            ESP_LOGI(TAG, "Publishing run data via MQTT...");
+            esp_mqtt_client_publish(mqtt_client, "run", output_message.c_str(), 0, 0, 0);
+            app.log.pop_back();
         }
 
-        vTaskDelay(50);
+        taskYIELD();
     }
 }
 
@@ -432,9 +478,10 @@ extern "C" void app_main(void)
     stop_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     reset_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     xTaskCreate(blink, "blink", 2048, NULL, 10, NULL);
-    xTaskCreate(start_button_task, "start_button", 4096, NULL, 10, NULL);
+    xTaskCreate(start_button_task, "start_button", 8192, NULL, 10, NULL);
     xTaskCreate(stop_button_task, "start_button", 2048, NULL, 10, NULL);
     xTaskCreate(reset_button_task, "start_button", 2048, NULL, 10, NULL);
+    xTaskCreate(synchronize_log, "start_button", 2048, NULL, 10, NULL);
 
     // Initialize task to synchronize logged data
     // TaskHandle_t xHandle = NULL;
