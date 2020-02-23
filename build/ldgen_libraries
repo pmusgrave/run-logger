@@ -59,6 +59,7 @@
 /home/paul/Documents/code/run-logger/build/esp-idf/unity/libunity.a
 /home/paul/Documents/code/run-logger/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 /home/paul/Documents/code/run-logger/build/esp-idf/main/libmain.a
+/home/paul/Documents/code/run-logger/build/esp-idf/minmea/libminmea.a
 /home/paul/Documents/code/run-logger/build/esp-idf/mqtt_start/libmqtt_start.a
 /home/paul/Documents/code/run-logger/build/esp-idf/run/librun.a
 /home/paul/Documents/code/run-logger/build/esp-idf/runlogger/librunlogger.a
