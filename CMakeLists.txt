@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.5)
 
 set(EXTRA_COMPONENT_DIRS "./components" $ENV{IDF_PATH}/examples/common_components/protocol_examples_common)
 
-set(TEST_COMPONENTS "run" "runlogger" "mqtt_start" "minmea" CACHE STRING "List of components to test")
+set(TEST_COMPONENTS "run" "runlogger" "gps" "mqtt_start" "minmea" CACHE STRING "List of components to test")
 
 set(SUPPORTED_TARGETS esp32)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)

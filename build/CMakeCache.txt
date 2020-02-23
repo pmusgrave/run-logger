@@ -235,7 +235,7 @@ PYTHON_DEPS_CHECKED:UNINITIALIZED=1
 PYTHON_EXECUTABLE:FILEPATH=/home/paul/.espressif/python_env/idf4.1_py2.7_env/bin/python
 
 //List of components to test
-TEST_COMPONENTS:STRING=run;runlogger;mqtt_start;minmea
+TEST_COMPONENTS:STRING=run;runlogger;gps;mqtt_start;minmea
 
 //Allow unsafe builds. These builds ARE NOT SECURE.
 UNSAFE_BUILD:BOOL=OFF
@@ -341,6 +341,9 @@ __idf_freemodbus_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;gener
 
 //Dependencies for the target
 __idf_freertos_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
+
+//Dependencies for the target
+__idf_gps_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
 
 //Dependencies for the target
 __idf_heap_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
