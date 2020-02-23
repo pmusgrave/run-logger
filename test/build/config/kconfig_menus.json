@@ -1382,34 +1382,6 @@
     {
         "children": [
             {
-                "children": [], 
-                "depends_on": null, 
-                "help": "URL of the broker to connect to", 
-                "id": "BROKER_URL", 
-                "name": "BROKER_URL", 
-                "range": null, 
-                "title": "Broker URL", 
-                "type": "string"
-            }, 
-            {
-                "children": [], 
-                "depends_on": null, 
-                "help": null, 
-                "id": "BROKER_URL_FROM_STDIN", 
-                "name": "BROKER_URL_FROM_STDIN", 
-                "range": null, 
-                "title": null, 
-                "type": "bool"
-            }
-        ], 
-        "depends_on": null, 
-        "id": "example-configuration", 
-        "title": "Example Configuration", 
-        "type": "menu"
-    }, 
-    {
-        "children": [
-            {
                 "children": [
                     {
                         "children": [], 
@@ -13131,6 +13103,187 @@
                 "depends_on": null, 
                 "id": "component-config-mdns", 
                 "title": "mDNS", 
+                "type": "menu"
+            }, 
+            {
+                "children": [
+                    {
+                        "children": [], 
+                        "depends_on": null, 
+                        "help": "If not, this library will use MQTT protocol 3.1", 
+                        "id": "MQTT_PROTOCOL_311", 
+                        "name": "MQTT_PROTOCOL_311", 
+                        "range": null, 
+                        "title": "Enable MQTT protocol 3.1.1", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [], 
+                        "depends_on": null, 
+                        "help": "Enable MQTT transport over SSL with mbedtls", 
+                        "id": "MQTT_TRANSPORT_SSL", 
+                        "name": "MQTT_TRANSPORT_SSL", 
+                        "range": null, 
+                        "title": "Enable MQTT over SSL", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [
+                            {
+                                "children": [], 
+                                "depends_on": "MQTT_TRANSPORT_WEBSOCKET && MQTT_TRANSPORT_SSL", 
+                                "help": "Enable MQTT transport over Websocket Secure.", 
+                                "id": "MQTT_TRANSPORT_WEBSOCKET_SECURE", 
+                                "name": "MQTT_TRANSPORT_WEBSOCKET_SECURE", 
+                                "range": null, 
+                                "title": "Enable MQTT over Websocket Secure", 
+                                "type": "bool"
+                            }
+                        ], 
+                        "depends_on": null, 
+                        "help": "Enable MQTT transport over Websocket.", 
+                        "id": "MQTT_TRANSPORT_WEBSOCKET", 
+                        "name": "MQTT_TRANSPORT_WEBSOCKET", 
+                        "range": null, 
+                        "title": "Enable MQTT over Websocket", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [
+                            {
+                                "children": [], 
+                                "depends_on": "MQTT_USE_CUSTOM_CONFIG", 
+                                "help": "Default MQTT over TCP port", 
+                                "id": "MQTT_TCP_DEFAULT_PORT", 
+                                "name": "MQTT_TCP_DEFAULT_PORT", 
+                                "range": null, 
+                                "title": "Default MQTT over TCP port", 
+                                "type": "int"
+                            }, 
+                            {
+                                "children": [], 
+                                "depends_on": "MQTT_USE_CUSTOM_CONFIG && MQTT_TRANSPORT_SSL", 
+                                "help": "Default MQTT over SSL port", 
+                                "id": "MQTT_SSL_DEFAULT_PORT", 
+                                "name": "MQTT_SSL_DEFAULT_PORT", 
+                                "range": null, 
+                                "title": "Default MQTT over SSL port", 
+                                "type": "int"
+                            }, 
+                            {
+                                "children": [], 
+                                "depends_on": "MQTT_USE_CUSTOM_CONFIG && MQTT_TRANSPORT_WEBSOCKET", 
+                                "help": "Default MQTT over Websocket port", 
+                                "id": "MQTT_WS_DEFAULT_PORT", 
+                                "name": "MQTT_WS_DEFAULT_PORT", 
+                                "range": null, 
+                                "title": "Default MQTT over Websocket port", 
+                                "type": "int"
+                            }, 
+                            {
+                                "children": [], 
+                                "depends_on": "MQTT_USE_CUSTOM_CONFIG && MQTT_TRANSPORT_WEBSOCKET && MQTT_TRANSPORT_WEBSOCKET_SECURE", 
+                                "help": "Default MQTT over Websocket Secure port", 
+                                "id": "MQTT_WSS_DEFAULT_PORT", 
+                                "name": "MQTT_WSS_DEFAULT_PORT", 
+                                "range": null, 
+                                "title": "Default MQTT over Websocket Secure port", 
+                                "type": "int"
+                            }, 
+                            {
+                                "children": [], 
+                                "depends_on": "MQTT_USE_CUSTOM_CONFIG", 
+                                "help": "This buffer size using for both transmit and receive", 
+                                "id": "MQTT_BUFFER_SIZE", 
+                                "name": "MQTT_BUFFER_SIZE", 
+                                "range": null, 
+                                "title": "Default MQTT Buffer Size", 
+                                "type": "int"
+                            }, 
+                            {
+                                "children": [], 
+                                "depends_on": "MQTT_USE_CUSTOM_CONFIG", 
+                                "help": "MQTT task stack size", 
+                                "id": "MQTT_TASK_STACK_SIZE", 
+                                "name": "MQTT_TASK_STACK_SIZE", 
+                                "range": null, 
+                                "title": "MQTT task stack size", 
+                                "type": "int"
+                            }, 
+                            {
+                                "children": [], 
+                                "depends_on": "MQTT_USE_CUSTOM_CONFIG", 
+                                "help": "Default config employs API locks to protect internal structures. It is possible to disable\nthese locks if the user code doesn't access MQTT API from multiple concurrent tasks", 
+                                "id": "MQTT_DISABLE_API_LOCKS", 
+                                "name": "MQTT_DISABLE_API_LOCKS", 
+                                "range": null, 
+                                "title": "Disable API locks", 
+                                "type": "bool"
+                            }
+                        ], 
+                        "depends_on": null, 
+                        "help": "Custom MQTT configurations.", 
+                        "id": "MQTT_USE_CUSTOM_CONFIG", 
+                        "name": "MQTT_USE_CUSTOM_CONFIG", 
+                        "range": null, 
+                        "title": "MQTT Using custom configurations", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [
+                            {
+                                "children": [
+                                    {
+                                        "children": [], 
+                                        "depends_on": "<choice MQTT_TASK_CORE_SELECTION>", 
+                                        "help": null, 
+                                        "id": "MQTT_USE_CORE_0", 
+                                        "name": "MQTT_USE_CORE_0", 
+                                        "range": null, 
+                                        "title": "Core 0", 
+                                        "type": "bool"
+                                    }, 
+                                    {
+                                        "children": [], 
+                                        "depends_on": "<choice MQTT_TASK_CORE_SELECTION>", 
+                                        "help": null, 
+                                        "id": "MQTT_USE_CORE_1", 
+                                        "name": "MQTT_USE_CORE_1", 
+                                        "range": null, 
+                                        "title": "Core 1", 
+                                        "type": "bool"
+                                    }
+                                ], 
+                                "depends_on": "MQTT_TASK_CORE_SELECTION_ENABLED", 
+                                "help": null, 
+                                "id": "component-config-esp-mqtt-configurations-enable-mqtt-task-core-selection-core-to-use-", 
+                                "name": "MQTT_TASK_CORE_SELECTION", 
+                                "title": "Core to use ?", 
+                                "type": "choice"
+                            }
+                        ], 
+                        "depends_on": null, 
+                        "help": "This will enable core selection", 
+                        "id": "MQTT_TASK_CORE_SELECTION_ENABLED", 
+                        "name": "MQTT_TASK_CORE_SELECTION_ENABLED", 
+                        "range": null, 
+                        "title": "Enable MQTT task core selection", 
+                        "type": "bool"
+                    }, 
+                    {
+                        "children": [], 
+                        "depends_on": null, 
+                        "help": "Set to true if a specific implementation of message outbox is needed (e.g. persistant outbox in NVM or\nsimilar).", 
+                        "id": "MQTT_CUSTOM_OUTBOX", 
+                        "name": "MQTT_CUSTOM_OUTBOX", 
+                        "range": null, 
+                        "title": "Enable custom outbox implementation", 
+                        "type": "bool"
+                    }
+                ], 
+                "depends_on": null, 
+                "id": "component-config-esp-mqtt-configurations", 
+                "title": "ESP-MQTT Configurations", 
                 "type": "menu"
             }, 
             {

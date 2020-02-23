@@ -30,6 +30,11 @@ extern "C" {
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "driver/uart.h"
+#define TXD_PIN (GPIO_NUM_17)
+#define RXD_PIN (GPIO_NUM_16)
+static const int RX_BUF_SIZE = 1024;
+
 /* The examples use WiFi configuration that you can set via project configuration menu
 
    If you'd rather not, just change the below entries to strings with
@@ -254,7 +259,7 @@ static void blink(void* arg) {
         else {
             gpio_set_level((gpio_num_t)LED, 0);
         }
-        taskYIELD();
+        vTaskDelay(1);
     }
 }
 
@@ -316,7 +321,7 @@ static void start_button_task(void* arg) {
                 }
             }
         }
-        taskYIELD();
+        vTaskDelay(1);
     }
 }
 
@@ -364,7 +369,7 @@ static void reset_button_task(void* arg) {
     }
 }
 
-void synchronize_log(void* pvParameter) {
+static void synchronize_log(void* pvParameter) {
     Run data;
     while (1) {
         if (on_wifi && app.log.size() > 0) {
@@ -390,8 +395,41 @@ void synchronize_log(void* pvParameter) {
     }
 }
 
+static void uart_rx_task(void* arg) {
+    static const char *RX_TASK_TAG = "RX_TASK";
+    esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
+    uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE+1);
+    while (1) {
+        const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE, 1000 / portTICK_RATE_MS);
+        if (rxBytes > 0) {
+            data[rxBytes] = 0;
+            printf("%s", data);
+            // ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
+        }
+    }
+    free(data);
+}
+
+
+
 extern "C" void app_main(void)
 {
+
+    std::cout << "Initializing UART" << std::endl;
+    const int uart_num = UART_NUM_1;
+    uart_config_t uart_config = {
+        9600,
+        UART_DATA_8_BITS,
+        UART_PARITY_DISABLE,
+        UART_STOP_BITS_1,
+        UART_HW_FLOWCTRL_DISABLE,
+        0
+    };
+    uart_driver_install(uart_num, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
+    uart_param_config(uart_num, &uart_config);
+    uart_set_pin(uart_num, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+
+
     //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -479,9 +517,10 @@ extern "C" void app_main(void)
     reset_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     xTaskCreate(blink, "blink", 2048, NULL, 10, NULL);
     xTaskCreate(start_button_task, "start_button", 8192, NULL, 10, NULL);
-    xTaskCreate(stop_button_task, "start_button", 2048, NULL, 10, NULL);
-    xTaskCreate(reset_button_task, "start_button", 2048, NULL, 10, NULL);
-    xTaskCreate(synchronize_log, "start_button", 2048, NULL, 10, NULL);
+    xTaskCreate(stop_button_task, "stop_button", 2048, NULL, 10, NULL);
+    xTaskCreate(reset_button_task, "reset_button", 2048, NULL, 10, NULL);
+    xTaskCreate(synchronize_log, "synchronize_log", 2048, NULL, 10, NULL);
+    xTaskCreate(uart_rx_task, "uart_rx_task", 2048, NULL, 10, NULL);
 
     // Initialize task to synchronize logged data
     // TaskHandle_t xHandle = NULL;
