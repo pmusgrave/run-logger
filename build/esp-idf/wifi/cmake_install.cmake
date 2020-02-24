@@ -1,4 +1,4 @@
-# Install script for directory: /home/paul/Documents/code/run-logger/components/gps
+# Install script for directory: /home/paul/Documents/code/run-logger/components/wifi
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

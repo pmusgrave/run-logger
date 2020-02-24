@@ -10,7 +10,7 @@ set(EXTRA_COMPONENT_DIRS "../components" $ENV{IDF_PATH}/examples/common_componen
 # - when invoking CMake directly: cmake -D TEST_COMPONENTS="xxxxx" ..
 # - when using idf.py: idf.py -T xxxxx build
 #
-set(TEST_COMPONENTS "run" "runlogger" CACHE STRING "List of components to test")
+set(TEST_COMPONENTS "run" "runlogger" "wifi" "sntp_time_sync" CACHE STRING "List of components to test")
 
 set(SUPPORTED_TARGETS esp32)
 

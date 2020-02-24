@@ -1,219 +1,27 @@
 #include <iostream>
 #include <string>
+#include <cmath>
 #include "driver/gpio.h"
+#include "driver/uart.h"
+#include "esp_log.h"
+#include "nvs_flash.h"
+#include "wifi.hpp"
+#include "sntp_time_sync.hpp"
 #include "run.hpp"
 #include "runlogger.hpp"
 #include "sntp.h"
+#include "minmea.h"
 extern "C" {
     #include "mqtt_start.h"    
 }
 
-
-/* WiFi station Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
-#include "esp_event.h"
-#include "esp_log.h"
-#include "nvs_flash.h"
-
-#include "lwip/err.h"
-#include "lwip/sys.h"
-
-#include "driver/uart.h"
-#include "minmea.h"
 #define METERS_TO_MILES_FACTOR (0.00062137)
 #define TXD_PIN (GPIO_NUM_17)
 #define RXD_PIN (GPIO_NUM_16)
 static const int RX_BUF_SIZE = 1024;
-
-/* The examples use WiFi configuration that you can set via project configuration menu
-
-   If you'd rather not, just change the below entries to strings with
-   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
-*/
-#define EXAMPLE_ESP_WIFI_SSID      ""
-#define EXAMPLE_ESP_WIFI_PASS      ""
-#define EXAMPLE_ESP_MAXIMUM_RETRY  CONFIG_ESP_MAXIMUM_RETRY
-
-/* FreeRTOS event group to signal when we are connected*/
-static EventGroupHandle_t s_wifi_event_group;
-
-/* The event group allows multiple bits for each event, but we only care about two events:
- * - we are connected to the AP with an IP
- * - we failed to connect after the maximum amount of retries */
-#define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT      BIT1
-
 static const char *TAG = "runlogger";
-
-static int s_retry_num = 0;
-
-volatile uint8_t on_wifi = 0;
-
-static void event_handler(void* arg, esp_event_base_t event_base,
-                                int32_t event_id, void* event_data)
-{
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        esp_wifi_connect();
-    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY) {
-            esp_wifi_connect();
-            s_retry_num++;
-            ESP_LOGI(TAG, "retry to connect to the AP");
-        } else {
-            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
-        }
-        ESP_LOGI(TAG,"connect to the AP fail");
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-        s_retry_num = 0;
-        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
-    }
-}
-
-void wifi_init_sta(void)
-{
-    s_wifi_event_group = xEventGroupCreate();
-
-    ESP_ERROR_CHECK(esp_netif_init());
-
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
-
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
-
-    wifi_config_t wifi_config = {};
-    wifi_config.sta = {};
-    uint8_t ssid_init_buf[32];
-    memcpy(ssid_init_buf, EXAMPLE_ESP_WIFI_SSID, sizeof(EXAMPLE_ESP_WIFI_SSID)/sizeof(char));
-    memcpy(wifi_config.sta.ssid, ssid_init_buf, 32);
-    uint8_t password_init_buf[64];
-    memcpy(password_init_buf, EXAMPLE_ESP_WIFI_PASS, sizeof(EXAMPLE_ESP_WIFI_PASS)/sizeof(char));
-    memcpy(wifi_config.sta.password, password_init_buf, 64);
-        
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
-    ESP_ERROR_CHECK(esp_wifi_start() );
-
-    ESP_LOGI(TAG, "wifi_init_sta finished.");
-
-    /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
-     * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
-    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
-            WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-            pdFALSE,
-            pdFALSE,
-            portMAX_DELAY);
-
-    /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
-     * happened. */
-    if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
-                 EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
-        on_wifi = 1;
-    } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
-                 EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
-        on_wifi = 0;
-    } else {
-        ESP_LOGE(TAG, "UNEXPECTED EVENT");
-    }
-
-    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
-    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
-    vEventGroupDelete(s_wifi_event_group);
-}
-
-/******************************************************************************
-*   SNTP EXAMPLE SOURCE
-******************************************************************************/
-/* LwIP SNTP example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-#include <time.h>
-#include <sys/time.h>
-#include "esp_attr.h"
-#include "esp_sleep.h"
-#include "protocol_examples_common.h"
-#include "esp_sntp.h"
-
-/* Variable holding number of times ESP32 restarted since first boot.
- * It is placed into RTC memory using RTC_DATA_ATTR and
- * maintains its value when ESP32 wakes from deep sleep.
- */
-RTC_DATA_ATTR static int boot_count = 0;
-
-static void obtain_time(void);
-static void initialize_sntp(void);
-
-#ifdef CONFIG_SNTP_TIME_SYNC_METHOD_CUSTOM
-void sntp_sync_time(struct timeval *tv)
-{
-   settimeofday(tv, NULL);
-   ESP_LOGI(TAG, "Time is synchronized from custom code");
-   sntp_set_sync_status(SNTP_SYNC_STATUS_COMPLETED);
-}
-#endif
-
-void time_sync_notification_cb(struct timeval *tv)
-{
-    ESP_LOGI(TAG, "Notification of a time synchronization event");
-}
-
-static void obtain_time(void)
-{
-    ESP_ERROR_CHECK( nvs_flash_init() );
-
-    initialize_sntp();
-
-    // wait for time to be set
-    time_t now = 0;
-    struct tm timeinfo = { 0 };
-    int retry = 0;
-    const int retry_count = 10;
-    while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
-        ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
-    }
-    time(&now);
-    localtime_r(&now, &timeinfo);
-
-    // ESP_ERROR_CHECK( example_disconnect() );
-}
-
-static void initialize_sntp(void)
-{
-    ESP_LOGI(TAG, "Initializing SNTP");
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, "pool.ntp.org");
-    sntp_set_time_sync_notification_cb(time_sync_notification_cb);
-#ifdef CONFIG_SNTP_TIME_SYNC_METHOD_SMOOTH
-    sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
-#endif
-    sntp_init();
-}
-/*****************************************************************************/
+extern volatile uint8_t on_wifi;
+extern RTC_DATA_ATTR int boot_count;
 
 #define ESP_INTR_FLAG_DEFAULT 0
 
@@ -377,12 +185,22 @@ static void synchronize_log(void* pvParameter) {
         if (on_wifi && app.log.size() > 0) {
             ESP_LOGI(TAG, "Synchronizing data...");
             data = app.log.back();
+            struct tm date_local_time = data.get_start_date();
+            char buffer[100];
+            sprintf(buffer, "%04d-%02d-%02d", 
+                date_local_time.tm_year + 1900,
+                date_local_time.tm_mon + 1,
+                date_local_time.tm_mday);
+            std::string date(buffer);
             std::string output_message = 
                 std::string("{\n\t")
-                + "distance: "
-                + std::to_string(data.get_distance())
+                + "\"date\":"
+                + " \"" + date + "\""
                 + ",\n\t"
-                + "duration: "
+                + "\"distance\": "
+                + std::to_string(data.get_distance() * METERS_TO_MILES_FACTOR)
+                + ",\n\t"
+                + "\"duration\": "
                 + std::to_string(data.get_duration().tv_sec)
                 + "."
                 + std::to_string(data.get_duration().tv_sec)
@@ -415,6 +233,8 @@ static void parse_gps_from_uart_task(void* arg) {
             switch (minmea_sentence_id((char*)(line), false)) {
                 case MINMEA_SENTENCE_RMC: {
                     struct minmea_sentence_rmc frame;
+                    double lat;
+                    double lon;
                     if (minmea_parse_rmc(&frame, (const char*)line)) {
                         printf("$xxRMC: raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
                                 frame.latitude.value, frame.latitude.scale,
@@ -428,9 +248,11 @@ static void parse_gps_from_uart_task(void* arg) {
                                 minmea_tocoord(&frame.latitude),
                                 minmea_tocoord(&frame.longitude),
                                 minmea_tofloat(&frame.speed));
-                        app.handle_new_gps_coord(
-                            minmea_tocoord(&frame.latitude), 
-                            minmea_tocoord(&frame.longitude));
+                        lat = minmea_tocoord(&frame.latitude);
+                        lon = minmea_tocoord(&frame.longitude);
+                        if(!std::isnan(lat) && !std::isnan(lon)){
+                            app.handle_new_gps_coord(lat,lon);    
+                        }
                     }
                     else {
                         printf("$xxRMC sentence is not parsed\n");
@@ -531,9 +353,15 @@ static void parse_gps_from_uart_task(void* arg) {
             }
 
             line = strtok(NULL,"\r\n");
-            
-            vTaskDelay(50);
         }
+        /* Not sure how much to delay yet. There's a tradeoff between sampling
+        rate and percent error in the distance measurement due to the accuracy
+        limitations of the GPS system. For instance, if you sample repeatedly
+        while the device is in the same position, GPS tolerance will make the
+        distance calculation continue to accrue roughly 10m per sample, in the
+        worst case. Sampling less frequently reduces this error, but it also 
+        reduces the overall measuring accuracy of your running route.*/
+        vTaskDelay(1000);
     }
     free(data);
 }
@@ -542,7 +370,6 @@ static void parse_gps_from_uart_task(void* arg) {
 
 extern "C" void app_main(void)
 {
-
     std::cout << "Initializing UART" << std::endl;
     const int uart_num = UART_NUM_1;
     uart_config_t uart_config = {
@@ -558,7 +385,6 @@ extern "C" void app_main(void)
     uart_set_pin(uart_num, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
 
-    //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
       ESP_ERROR_CHECK(nvs_flash_erase());
@@ -570,9 +396,6 @@ extern "C" void app_main(void)
     wifi_init_sta();
 
 
-    /**************************************************************************
-    *   SNTP EXAMPLE MAIN
-    **************************************************************************/
     ++boot_count;
     ESP_LOGI(TAG, "Boot count: %d", boot_count);
 
@@ -649,9 +472,4 @@ extern "C" void app_main(void)
     xTaskCreate(reset_button_task, "reset_button", 2048, NULL, 10, NULL);
     xTaskCreate(synchronize_log, "synchronize_log", 2048, NULL, 10, NULL);
     xTaskCreate(parse_gps_from_uart_task, "parse_gps_from_uart_task", 2048, NULL, 10, NULL);
-
-    // Initialize task to synchronize logged data
-    // TaskHandle_t xHandle = NULL;
-    // xTaskCreate( synchronize_log, "SYNCHRONIZE_LOG", 2048, NULL, tskIDLE_PRIORITY, &xHandle );
-    // configASSERT( xHandle );
 }

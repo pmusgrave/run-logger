@@ -412,6 +412,9 @@ __idf_runlogger_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;genera
 __idf_sdmmc_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
 
 //Dependencies for the target
+__idf_sntp_time_sync_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
+
+//Dependencies for the target
 __idf_soc_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
 
 //Dependencies for the target
@@ -437,6 +440,9 @@ __idf_vfs_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__id
 
 //Dependencies for the target
 __idf_wear_levelling_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
+
+//Dependencies for the target
+__idf_wifi_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
 
 //Dependencies for the target
 __idf_wifi_provisioning_LIB_DEPENDS:STATIC=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_heap;general;__idf_log;general;__idf_lwip;general;__idf_soc;general;__idf_esp_common;general;__idf_xtensa;general;__idf_esp32;
@@ -586,7 +592,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=81
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=83
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

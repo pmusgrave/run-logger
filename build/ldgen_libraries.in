@@ -63,6 +63,8 @@ $<TARGET_FILE:__idf_minmea>
 $<TARGET_FILE:__idf_mqtt_start>
 $<TARGET_FILE:__idf_run>
 $<TARGET_FILE:__idf_runlogger>
+$<TARGET_FILE:__idf_sntp_time_sync>
+$<TARGET_FILE:__idf_wifi>
 $<TARGET_FILE:__idf_protocol_examples_common>
 $<TARGET_FILE:__run_test>
 $<TARGET_FILE:__runlogger_test>
