@@ -104,3 +104,20 @@ TEST_CASE("Stop run", "[run]") {
 	TEST_ASSERT_EQUAL(true, test_run.is_paused());
 	TEST_ASSERT_EQUAL(1, test_run.get_duration().tv_sec);
 }
+
+TEST_CASE("New coordinate", "[run]") {
+	Run test_run;
+	TEST_ASSERT_EQUAL(0, test_run.get_distance());
+	
+	test_run.start();
+	test_run.add_gps_point_to_distance(39.174118,-84.228836);
+	TEST_ASSERT_EQUAL(0, test_run.get_distance());
+	test_run.add_gps_point_to_distance(39.,-84.);
+	TEST_ASSERT_EQUAL(27657.34, test_run.get_distance());
+	test_run.add_gps_point_to_distance(39.174118,-84.228836);
+	TEST_ASSERT_EQUAL(27657.34*2, test_run.get_distance());
+
+	test_run.pause();
+	test_run.add_gps_point_to_distance(39.,-84.);
+	TEST_ASSERT_EQUAL(27657.34*2, test_run.get_distance());
+}

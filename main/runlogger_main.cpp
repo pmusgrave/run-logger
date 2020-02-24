@@ -396,7 +396,7 @@ static void synchronize_log(void* pvParameter) {
     }
 }
 
-static void uart_rx_task(void* arg) {
+static void parse_gps_from_uart_task(void* arg) {
     static const char *RX_TASK_TAG = "RX_TASK";
     esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
     uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE+1);
@@ -644,7 +644,7 @@ extern "C" void app_main(void)
     xTaskCreate(stop_button_task, "stop_button", 2048, NULL, 10, NULL);
     xTaskCreate(reset_button_task, "reset_button", 2048, NULL, 10, NULL);
     xTaskCreate(synchronize_log, "synchronize_log", 2048, NULL, 10, NULL);
-    xTaskCreate(uart_rx_task, "uart_rx_task", 2048, NULL, 10, NULL);
+    xTaskCreate(parse_gps_from_uart_task, "parse_gps_from_uart_task", 2048, NULL, 10, NULL);
 
     // Initialize task to synchronize logged data
     // TaskHandle_t xHandle = NULL;

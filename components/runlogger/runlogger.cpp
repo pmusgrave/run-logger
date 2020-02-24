@@ -96,3 +96,9 @@ void RunLogger::handle_reset_button(void){
 void RunLogger::push_data_to_cloud(void) {
 	
 }
+
+void RunLogger::handle_new_gps_coord(double lat, double lon) {
+	if (current_run.is_in_progress()) {
+		current_run.add_gps_point_to_distance(lat, lon);
+	}
+}

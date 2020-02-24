@@ -22,6 +22,7 @@ public:
 	void handle_start_pause_button(void);
 	void handle_stop_button(void);
 	void handle_reset_button(void);
+	void handle_new_gps_coord(double lat, double lon);
 	
 private:
 	volatile uint8_t state;

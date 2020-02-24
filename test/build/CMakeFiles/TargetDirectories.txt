@@ -531,6 +531,13 @@
 /home/paul/Documents/code/run-logger/test/build/esp-idf/main/CMakeFiles/install/local.dir
 /home/paul/Documents/code/run-logger/test/build/esp-idf/main/CMakeFiles/rebuild_cache.dir
 /home/paul/Documents/code/run-logger/test/build/esp-idf/main/CMakeFiles/install.dir
+/home/paul/Documents/code/run-logger/test/build/esp-idf/minmea/CMakeFiles/install/strip.dir
+/home/paul/Documents/code/run-logger/test/build/esp-idf/minmea/CMakeFiles/edit_cache.dir
+/home/paul/Documents/code/run-logger/test/build/esp-idf/minmea/CMakeFiles/__idf_minmea.dir
+/home/paul/Documents/code/run-logger/test/build/esp-idf/minmea/CMakeFiles/install.dir
+/home/paul/Documents/code/run-logger/test/build/esp-idf/minmea/CMakeFiles/rebuild_cache.dir
+/home/paul/Documents/code/run-logger/test/build/esp-idf/minmea/CMakeFiles/list_install_components.dir
+/home/paul/Documents/code/run-logger/test/build/esp-idf/minmea/CMakeFiles/install/local.dir
 /home/paul/Documents/code/run-logger/test/build/esp-idf/mqtt_start/CMakeFiles/install/strip.dir
 /home/paul/Documents/code/run-logger/test/build/esp-idf/mqtt_start/CMakeFiles/edit_cache.dir
 /home/paul/Documents/code/run-logger/test/build/esp-idf/mqtt_start/CMakeFiles/__idf_mqtt_start.dir
