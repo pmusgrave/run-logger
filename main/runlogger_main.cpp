@@ -32,6 +32,7 @@ extern "C" {
 
 #include "driver/uart.h"
 #include "minmea.h"
+#define METERS_TO_MILES_FACTOR (0.00062137)
 #define TXD_PIN (GPIO_NUM_17)
 #define RXD_PIN (GPIO_NUM_16)
 static const int RX_BUF_SIZE = 1024;
@@ -308,7 +309,7 @@ static void start_button_task(void* arg) {
                         + " \"" + date + "\""
                         + ",\n\t"
                         + "\"distance\": "
-                        + std::to_string(data.get_distance())
+                        + std::to_string(data.get_distance() * METERS_TO_MILES_FACTOR)
                         + ",\n\t"
                         + "\"duration\": "
                         + std::to_string(data.get_duration().tv_sec)
@@ -427,6 +428,9 @@ static void parse_gps_from_uart_task(void* arg) {
                                 minmea_tocoord(&frame.latitude),
                                 minmea_tocoord(&frame.longitude),
                                 minmea_tofloat(&frame.speed));
+                        app.handle_new_gps_coord(
+                            minmea_tocoord(&frame.latitude), 
+                            minmea_tocoord(&frame.longitude));
                     }
                     else {
                         printf("$xxRMC sentence is not parsed\n");
