@@ -6,6 +6,7 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "wifi.hpp"
+#include "esp_wifi.h"
 #include "sntp_time_sync.hpp"
 #include "run.hpp"
 #include "runlogger.hpp"
@@ -179,9 +180,39 @@ static void reset_button_task(void* arg) {
     }
 }
 
+SemaphoreHandle_t mqtt_config_semaphore = NULL;
+static void wifi_handler(void* pvParameter) {
+    mqtt_config_semaphore = xSemaphoreCreateBinary();
+    vTaskDelay(1000);
+    while(1) {
+        if(mqtt_config_semaphore != NULL){
+            std::cout << "Acquiring mqtt semaphore" << std::endl;
+            xSemaphoreTake(mqtt_config_semaphore,portMAX_DELAY);
+            while(!on_wifi){
+                esp_mqtt_client_stop(mqtt_client);
+                std::cout  << "waiting" << std::endl;
+                vTaskDelay(10);
+            }
+            // if(esp_wifi_disconnect() == ESP_OK) {
+            //     std::cout << "Disconnected" << std::endl;
+            // }
+            //on_wifi = 0;
+            //wifi_init_sta();
+            if(on_wifi){
+                std::cout << "Reconnected" << std::endl;
+                esp_mqtt_client_start(mqtt_client);
+                std::cout << "Releasing mqtt semaphore" << std::endl;
+                xSemaphoreGive(mqtt_config_semaphore);
+            }    
+        }
+        vTaskDelay(10);
+    }
+}
+
 static void synchronize_log(void* pvParameter) {
     Run data;
     while (1) {
+        xSemaphoreTake(mqtt_config_semaphore,portMAX_DELAY);
         if (on_wifi && app.log.size() > 0) {
             ESP_LOGI(TAG, "Synchronizing data...");
             data = app.log.back();
@@ -207,11 +238,11 @@ static void synchronize_log(void* pvParameter) {
                 + "\n}";
             
             ESP_LOGI(TAG, "Publishing run data via MQTT...");
-            esp_mqtt_client_publish(mqtt_client, "run", output_message.c_str(), 0, 0, 0);
+            esp_mqtt_client_publish(mqtt_client, "run", output_message.c_str(), 0, 1, 0);
             app.log.pop_back();
         }
-
-        taskYIELD();
+        xSemaphoreGive(mqtt_config_semaphore);
+        vTaskDelay(1);
     }
 }
 
@@ -393,6 +424,9 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(ret);
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    esp_netif_create_default_wifi_sta();
     wifi_init_sta();
 
 
@@ -470,6 +504,7 @@ extern "C" void app_main(void)
     xTaskCreate(start_button_task, "start_button", 8192, NULL, 10, NULL);
     xTaskCreate(stop_button_task, "stop_button", 2048, NULL, 10, NULL);
     xTaskCreate(reset_button_task, "reset_button", 2048, NULL, 10, NULL);
+    xTaskCreate(wifi_handler, "wifi_handler", 2048*4, NULL, 10, NULL);
     xTaskCreate(synchronize_log, "synchronize_log", 2048, NULL, 10, NULL);
     xTaskCreate(parse_gps_from_uart_task, "parse_gps_from_uart_task", 2048, NULL, 10, NULL);
 }
