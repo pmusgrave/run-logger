@@ -11,8 +11,8 @@
 #include "lwip/sys.h"
 #include "wifi.hpp"
 
-#define WIFI_SSID      ""
-#define WIFI_PASS      ""
+#define WIFI_SSID      "DNABITUN"
+#define WIFI_PASS      "m1aL2k3um#"
 #define MAXIMUM_RETRY  5
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1

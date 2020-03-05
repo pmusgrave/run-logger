@@ -1,2 +1,2 @@
-idf_component_register(SRCS "wifi_station_test.cpp"
+idf_component_register(SRCS "runlogger_test.cpp"
                     INCLUDE_DIRS ".")

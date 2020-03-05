@@ -15,4 +15,4 @@ set(TEST_COMPONENTS "run" "runlogger" "wifi" "sntp_time_sync" CACHE STRING "List
 set(SUPPORTED_TARGETS esp32)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(wifi_station_test)
+project(runlogger_test)
