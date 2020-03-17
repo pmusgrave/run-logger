@@ -392,7 +392,7 @@ static void parse_gps_from_uart_task(void* arg) {
         distance calculation continue to accrue roughly 10m per sample, in the
         worst case. Sampling less frequently reduces this error, but it also 
         reduces the overall measuring accuracy of your running route.*/
-        vTaskDelay(1000);
+        vTaskDelay(1500);
     }
     free(data);
 }
