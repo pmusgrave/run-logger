@@ -124,7 +124,7 @@ function storeAllEvents(auth) {
             connection.query({
                 sql: 'INSERT INTO runlog (start_time, duration, distance_meters) values (?,?,?)',
                 timeout: 40000,
-                values: [start_date, distance, total_millis]
+                values: [start_date, total_millis, distance]
             }, function (error, results, fields) {
 
             });
