@@ -16,7 +16,7 @@ const TOKEN_PATH = 'token.json';
 
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
-    authorize(JSON.parse(content), storeAllEvents);
+    authorize(JSON.parse(content), storeNewEvents);
 });
 
 /**
@@ -133,4 +133,79 @@ function storeAllEvents(auth) {
         console.log('No events found.');
     }
   });
+}
+
+
+/**
+ * Format only new events since last update and insert them into MySQL DB
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+function storeNewEvents(auth) {
+    const calendar = google.calendar({version: 'v3', auth});
+    connection.query({
+        sql: 'SELECT MAX(start_time) FROM runlog;',
+        timeout: 40000
+    }, function (error, results, fields) {
+        if (error) throw error;
+        let start_date = new Date(results[0]['MAX(start_time)']);
+        console.log("latest time in DB: ", start_date);
+
+        calendar.events.list({
+            calendarId: 'jhkkf4eh49laqptu1i4esd8d8o@group.calendar.google.com',
+            timeMin: start_date.toISOString(),
+            maxResults: 10000,
+            singleEvents: true,
+            orderBy: 'startTime',
+        }, (err, res) => {
+            if (err) return console.log('The API returned an error: ' + err);
+            const events = res.data.items;
+            if (events.length) {
+                events.filter((event) => {
+                    return event.summary.includes('running');
+                }).map((event, i) => {
+                    const start = event.start.dateTime || event.start.date;
+                    let start_date = new Date(start);
+                    console.log(start_date);
+                    console.log(`${start} - ${event.summary}`);
+                    let row = event.summary.split('/').map(s => s.trim());
+                    if (row.length < 3
+                        || !row[0].includes('running')
+                        || !row[1].includes('mi')
+                        || !row[2].includes('min'))
+                        return;
+                    let distance = row[1];
+                    let time = row[2];
+
+                    distance = parseFloat(distance.replace(/[~mi!ish]/g, ''));
+                    if (isNaN(distance)) return;
+                    distance = distance * 1609.34; // convert from miles to meters
+
+                    let hour = 0;
+                    let min = 0;
+                    let sec = 0;
+                    if (time.includes('hr')) {
+                        hour = parseFloat(time.substr(0,time.indexOf('hr')));
+                        min = parseFloat(time.substr(time.indexOf('hr')+2,time.indexOf('min')));
+                    }
+                    else {
+                        min = parseFloat(time.substr(0,time.indexOf('min')));
+                    }
+                    sec = parseFloat(time.substr(time.indexOf('min')+3,time.indexOf('s')));
+
+                    if (isNaN(hour) || isNaN(min) || isNaN(sec)) return;
+                    let total_millis = (hour*60*60 + min*60 + sec) * 1000;
+
+                    connection.query({
+                        sql: 'INSERT INTO runlog (start_time, duration, distance_meters) values (?,?,?)',
+                        timeout: 40000,
+                        values: [start_date, total_millis, distance]
+                    }, function (error, results, fields) {
+
+                    });
+                });
+            } else {
+                console.log('No events found.');
+            }
+        });
+    });
 }

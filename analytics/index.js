@@ -1,6 +1,4 @@
 require('dotenv').config();
-const fs = require('fs');
-const readline = require('readline');
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host     : process.env.MYSQL_HOST,
@@ -25,10 +23,12 @@ connection.query({
     let min_date = new Date(results[0].start_time);
 
     console.log(`Calculating analytics for all data since ${min_date}`);
-    console.log("Total distance:\n\t", total_distance, "(meters)\n\t ", total_distance / 1609.34, "(mi)");
-    console.log("Total time:\n\t", total_time, "(ms)\n\t", total_time/1000/60/60, "(hours)");
+    console.log("Total distance:\n\t", total_distance.toPrecision(8), "(meters)\n\t ",
+                (total_distance / 1609.34).toPrecision(6), "(mi)");
+    console.log("Total time:\n\t", total_time.toPrecision(10), "(ms)\n\t",
+                (total_time/1000/60/60).toPrecision(5), "(hours)");
     console.log("Mean speed:\n\t",
-                total_distance / (total_time/1000), "(meters/sec)\n\t",
-                (total_time/1000/60) / (total_distance/1609.34), "(min/mi)");
+                (total_distance / (total_time/1000)).toPrecision(4), "(meters/sec)\n\t",
+                ((total_time/1000/60) / (total_distance/1609.34)).toPrecision(4), "(min/mi)");
     connection.end();
 });
