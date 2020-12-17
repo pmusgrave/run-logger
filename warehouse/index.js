@@ -16,7 +16,7 @@ const TOKEN_PATH = 'token.json';
 
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
-    authorize(JSON.parse(content), storeAllEvents);
+    authorize(JSON.parse(content), storeNewEvents);
 });
 
 /**
@@ -136,7 +136,6 @@ function storeAllEvents(auth) {
   });
 }
 
-
 /**
  * Format only new events since last update and insert them into MySQL DB
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
@@ -144,12 +143,13 @@ function storeAllEvents(auth) {
 function storeNewEvents(auth) {
     const calendar = google.calendar({version: 'v3', auth});
     connection.query({
-        sql: 'SELECT MAX(start_time) FROM runlog;',
+        sql: 'SELECT MAX(date) FROM runlog;',
         timeout: 40000
     }, function (error, results, fields) {
         if (error) throw error;
-        let start_date = new Date(results[0]['MAX(start_time)']);
+        let start_date = new Date(results[0]['MAX(date)']);
         console.log("latest time in DB: ", start_date);
+        start_date.setDate(start_date.getDate() + 1);
 
         calendar.events.list({
             calendarId: 'jhkkf4eh49laqptu1i4esd8d8o@group.calendar.google.com',
@@ -201,11 +201,13 @@ function storeNewEvents(auth) {
                         timeout: 40000,
                         values: [start, total_millis, distance]
                     }, function (error, results, fields) {
-
+                        console.log(results);
                     });
+
                 });
             } else {
-                console.log('No events found.');
+                console.log('No new events found.');
+                connection.end();
             }
         });
     });
