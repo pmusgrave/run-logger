@@ -16,7 +16,7 @@ const TOKEN_PATH = 'token.json';
 
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
-    authorize(JSON.parse(content), storeNewEvents);
+    authorize(JSON.parse(content), storeAllEvents);
 });
 
 /**
@@ -90,9 +90,9 @@ function storeAllEvents(auth) {
             return event.summary.includes('running');
         }).map((event, i) => {
             const start = event.start.dateTime || event.start.date;
-            let start_date = new Date(start);
-            // console.log(start_date);
-            // console.log(`${start} - ${event.summary}`);
+            //let start_date = new Date(start);
+            //console.log(start_date);
+            console.log(`${start} - ${event.summary}`);
             let row = event.summary.split('/').map(s => s.trim());
             if (row.length < 3
                 || !row[0].includes('running')
@@ -122,12 +122,13 @@ function storeAllEvents(auth) {
             let total_millis = (hour*60*60 + min*60 + sec) * 1000;
 
             connection.query({
-                sql: 'INSERT INTO runlog (start_time, duration, distance_meters) values (?,?,?)',
+                sql: 'INSERT INTO runlog (date, duration, distance_meters) values (?,?,?)',
                 timeout: 40000,
-                values: [start_date, total_millis, distance]
+                values: [start, total_millis, distance]
             }, function (error, results, fields) {
-
+                console.log(start, total_millis, distance, results);
             });
+
         });
     } else {
         console.log('No events found.');
@@ -164,8 +165,8 @@ function storeNewEvents(auth) {
                     return event.summary.includes('running');
                 }).map((event, i) => {
                     const start = event.start.dateTime || event.start.date;
-                    let start_date = new Date(start);
-                    console.log(start_date);
+                    //let start_date = new Date(start);
+                    //console.log(start_date);
                     console.log(`${start} - ${event.summary}`);
                     let row = event.summary.split('/').map(s => s.trim());
                     if (row.length < 3
@@ -196,9 +197,9 @@ function storeNewEvents(auth) {
                     let total_millis = (hour*60*60 + min*60 + sec) * 1000;
 
                     connection.query({
-                        sql: 'INSERT INTO runlog (start_time, duration, distance_meters) values (?,?,?)',
+                        sql: 'INSERT INTO runlog (date, duration, distance_meters) values (?,?,?)',
                         timeout: 40000,
-                        values: [start_date, total_millis, distance]
+                        values: [start, total_millis, distance]
                     }, function (error, results, fields) {
 
                     });

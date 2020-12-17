@@ -30,5 +30,6 @@ connection.query({
     console.log("Mean speed:\n\t",
                 (total_distance / (total_time/1000)).toPrecision(4), "(meters/sec)\n\t",
                 ((total_time/1000/60) / (total_distance/1609.34)).toPrecision(4), "(min/mi)");
+    console.log("Mean miles per week:\n\t");
     connection.end();
 });
