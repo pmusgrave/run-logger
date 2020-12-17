@@ -130,8 +130,10 @@ function storeAllEvents(auth) {
             });
 
         });
+        connection.end();
     } else {
         console.log('No events found.');
+        connection.end();
     }
   });
 }
@@ -205,6 +207,7 @@ function storeNewEvents(auth) {
                     });
 
                 });
+                connection.end();
             } else {
                 console.log('No new events found.');
                 connection.end();
