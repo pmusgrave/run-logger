@@ -49,6 +49,22 @@ connection.query({
 });
 
 connection.query({
+    sql: 'SELECT * FROM runlog WHERE date >= (NOW() - INTERVAL 7 DAY);',
+    timeout: 40000,
+    values: []
+}, (error, results, fields) => {
+    if (error) throw error;
+    console.log("MPW for the past 7 days:");
+    let mpw = 0;
+    for (let i = 0; i < results.length; i++) {
+        mpw += (results[i].distance_meters / 1609.34);
+    }
+    console.log("\t", mpw.toPrecision(4), "mpw");
+    //connection.end();
+});
+
+
+connection.query({
     sql: 'SELECT distance_meters,duration,date FROM runlog ORDER BY distance_meters DESC, duration ASC LIMIT 10;',
     timeout: 40000,
     values: []
