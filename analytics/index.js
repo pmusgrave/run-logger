@@ -56,7 +56,8 @@ connection.query({
     if (error) throw error;
     console.log("Your 10 longest runs were:");
     for (let i = 0; i < results.length; i++) {
-        console.log("\t",results[i].date,results[i].distance_meters/1609.34,"mi");
+        console.log("\t",new Date(results[i].date).toLocaleDateString(), "-",
+                    (results[i].distance_meters/1609.34).toPrecision(3),"mi");
     }
     // connection.end();
 });
@@ -70,7 +71,9 @@ connection.query({
     console.log("Your 10 fastest runs were:");
     for (let i = 0; i < results.length; i++) {
         console.log("\t",
-                    results[i].date,                    ((results[i].duration/1000/60)/(results[i].distance_meters/1609.34)).toPrecision(4),
+                    new Date(results[i].date).toLocaleDateString(), "-",
+                    (results[i].distance_meters/1609.34).toPrecision(3), "miles at",
+                    ((results[i].duration/1000/60)/(results[i].distance_meters/1609.34)).toPrecision(3),
                     "min/mi");
     }
     connection.end();
