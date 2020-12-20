@@ -60,9 +60,19 @@ connection.query({
         mpw += (results[i].distance_meters / 1609.34);
     }
     console.log("\t", mpw.toPrecision(4), "mpw");
+
+    let sorted_distances = results.map((row) => {
+        return row.distance_meters/1609.34
+    }).sort();
+    let sorted_times = results.map((row) => {
+        return row.duration/1000/60;
+    }).sort();
+    let median_miles = sorted_distances[Math.floor(sorted_distances.length/2)];
+    let median_min = sorted_times[Math.floor(sorted_times.length/2)];
+    console.log(`Median distance of the past 7 days: ${median_miles} mi`);
+    console.log(`Median speed of the past 7 days: ${(median_min/median_miles).toPrecision(4)} min/mi`);
     //connection.end();
 });
-
 
 connection.query({
     sql: 'SELECT distance_meters,duration,date FROM runlog ORDER BY distance_meters DESC, duration ASC LIMIT 10;',
