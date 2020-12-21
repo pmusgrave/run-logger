@@ -15,8 +15,10 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 const TOKEN_PATH = 'token.json';
 
 fs.readFile('credentials.json', (err, content) => {
-  if (err) return console.log('Error loading client secret file:', err);
-    authorize(JSON.parse(content), storeNewEvents);
+    if (err) return console.log('Error loading client secret file:', err);
+    setInterval(() => {
+        authorize(JSON.parse(content), storeNewEvents);
+    }, 1000*60*12);
 });
 
 /**
@@ -130,7 +132,7 @@ function storeAllEvents(auth) {
             });
 
         });
-        connection.end();
+        //connection.end();
     } else {
         console.log('No events found.');
         connection.end();
@@ -143,6 +145,7 @@ function storeAllEvents(auth) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function storeNewEvents(auth) {
+    console.log(`${(new Date).toISOString()}: Checking for new events`);
     const calendar = google.calendar({version: 'v3', auth});
     connection.query({
         sql: 'SELECT MAX(date) FROM runlog;',
@@ -210,7 +213,7 @@ function storeNewEvents(auth) {
                 connection.end();
             } else {
                 console.log('No new events found.');
-                connection.end();
+                //connection.end();
             }
         });
     });
