@@ -75,6 +75,16 @@ connection.query({
 });
 
 connection.query({
+    sql: 'SELECT SUM(distance_meters)/1609.34 from (SELECT * FROM runlog WHERE EXTRACT(YEAR FROM date) = EXTRACT(YEAR FROM NOW())) year_runs;',
+    timeout: 40000,
+    values: []
+}, (error, results, fields) => {
+    if (error) throw error;
+    console.log("Miles so far this year:");
+    console.log("\t", (results[0]['SUM(distance_meters)/1609.34']).toPrecision(4), "mi");
+});
+
+connection.query({
     sql: 'SELECT distance_meters,duration,date FROM runlog ORDER BY distance_meters DESC, duration ASC LIMIT 10;',
     timeout: 40000,
     values: []
