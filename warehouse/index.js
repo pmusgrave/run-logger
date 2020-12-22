@@ -18,7 +18,7 @@ fs.readFile('credentials.json', (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
     setInterval(() => {
         authorize(JSON.parse(content), storeNewEvents);
-    }, 1000*60*12);
+    }, 1000*60);
 });
 
 /**
@@ -132,10 +132,10 @@ function storeAllEvents(auth) {
             });
 
         });
-        //connection.end();
+        // connection.end();
     } else {
         console.log('No events found.');
-        connection.end();
+        // connection.end();
     }
   });
 }
@@ -210,7 +210,7 @@ function storeNewEvents(auth) {
                     });
 
                 });
-                connection.end();
+                // connection.end();
             } else {
                 console.log('No new events found.');
                 //connection.end();
