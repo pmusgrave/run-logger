@@ -1,9 +1,11 @@
 require('dotenv').config();
 const fs = require('fs');
+let request = require('request');
+const { v4: uuidv4 } = require('uuid');
 const {google} = require('googleapis');
 const readline = require('readline');
-var mysql = require('mysql');
-var connection = mysql.createConnection({
+let mysql = require('mysql');
+let connection = mysql.createConnection({
     host     : process.env.MYSQL_HOST,
     user     : process.env.MYSQL_USER,
     password : process.env.MYSQL_PASS,
@@ -16,9 +18,14 @@ const TOKEN_PATH = 'token.json';
 
 fs.readFile('credentials.json', (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
+
+    setInterval(() => {
+        authorize(JSON.parse(content), watchCalendar);
+    }, 30000);
+
     setInterval(() => {
         authorize(JSON.parse(content), storeNewEvents);
-    }, 1000*60);
+    }, 1000*60*60);
 });
 
 /**
@@ -217,4 +224,22 @@ function storeNewEvents(auth) {
             }
         });
     });
+}
+
+async function watchCalendar(auth) {
+    let id = uuidv4();
+    const response = await google.calendar({ version: 'v3', auth }).events.watch({
+        calendarId: 'jhkkf4eh49laqptu1i4esd8d8o@group.calendar.google.com',
+        resource: {
+            id,
+            address: process.env.WEBHOOK_CB,
+            type: 'web_hook',
+            params: {
+                ttl: '30000',
+            },
+        },
+    }).catch((err) => {
+        console.log(err)
+    });
+    console.log(response);
 }

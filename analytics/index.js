@@ -49,6 +49,37 @@ connection.query({
 });
 
 connection.query({
+    sql: 'SELECT distance_meters,duration,date FROM runlog ORDER BY distance_meters DESC, duration ASC LIMIT 10;',
+    timeout: 40000,
+    values: []
+}, (error, results, fields) => {
+    if (error) throw error;
+    console.log("Your 10 longest runs were:");
+    for (let i = 0; i < results.length; i++) {
+        console.log("\t",new Date(results[i].date).toLocaleDateString(), "-",
+                    (results[i].distance_meters/1609.34).toPrecision(3),"mi");
+    }
+    // connection.end();
+});
+
+connection.query({
+    sql: 'SELECT * FROM runlog ORDER BY (distance_meters/duration) desc limit 10;',
+    timeout: 40000,
+    values: []
+}, (error, results, fields) => {
+    if (error) throw error;
+    console.log("Your 10 fastest runs were:");
+    for (let i = 0; i < results.length; i++) {
+        console.log("\t",
+                    new Date(results[i].date).toLocaleDateString(), "-",
+                    (results[i].distance_meters/1609.34).toPrecision(3), "miles at",
+                    ((results[i].duration/1000/60)/(results[i].distance_meters/1609.34)).toPrecision(3),
+                    "min/mi");
+    }
+    connection.end();
+});
+
+connection.query({
     sql: 'SELECT * FROM runlog WHERE date >= (NOW() - INTERVAL 7 DAY);',
     timeout: 40000,
     values: []
@@ -82,35 +113,4 @@ connection.query({
     if (error) throw error;
     console.log("Miles so far this year:");
     console.log("\t", (results[0]['SUM(distance_meters)/1609.34']).toPrecision(4), "mi");
-});
-
-connection.query({
-    sql: 'SELECT distance_meters,duration,date FROM runlog ORDER BY distance_meters DESC, duration ASC LIMIT 10;',
-    timeout: 40000,
-    values: []
-}, (error, results, fields) => {
-    if (error) throw error;
-    console.log("Your 10 longest runs were:");
-    for (let i = 0; i < results.length; i++) {
-        console.log("\t",new Date(results[i].date).toLocaleDateString(), "-",
-                    (results[i].distance_meters/1609.34).toPrecision(3),"mi");
-    }
-    // connection.end();
-});
-
-connection.query({
-    sql: 'SELECT * FROM runlog ORDER BY (distance_meters/duration) desc limit 10;',
-    timeout: 40000,
-    values: []
-}, (error, results, fields) => {
-    if (error) throw error;
-    console.log("Your 10 fastest runs were:");
-    for (let i = 0; i < results.length; i++) {
-        console.log("\t",
-                    new Date(results[i].date).toLocaleDateString(), "-",
-                    (results[i].distance_meters/1609.34).toPrecision(3), "miles at",
-                    ((results[i].duration/1000/60)/(results[i].distance_meters/1609.34)).toPrecision(3),
-                    "min/mi");
-    }
-    connection.end();
 });

@@ -12,7 +12,9 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "googleapis": "^66.0.0",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "request": "^2.88.2",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
