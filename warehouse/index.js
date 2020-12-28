@@ -13,19 +13,39 @@ let connection = mysql.createConnection({
 });
 connection.connect();
 
+///////////////////////////////////////
+var express = require('express');
+var app = express();
+var path = require('path');
+
+// viewed at http://localhost:8080
+app.get('/*', function(req, res) {
+    res.sendFile(path.join(__dirname + '/googlec2523245017e1126.html'));
+});
+
+app.listen(process.env.PORT || 8080);
+///////////////////////////////////////
+
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 const TOKEN_PATH = 'token.json';
 
 fs.readFile('credentials.json', (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
 
+    authorize(JSON.parse(content), watchCalendar);
     setInterval(() => {
         authorize(JSON.parse(content), watchCalendar);
-    }, 30000);
+    }, 1000*60*60*24*7);
 
+    authorize(JSON.parse(content), storeNewEvents);
     setInterval(() => {
         authorize(JSON.parse(content), storeNewEvents);
     }, 1000*60*60);
+
+    app.post('/*', (req, res) => {
+        //console.log(req);
+        authorize(JSON.parse(content), storeNewEvents);
+    });
 });
 
 /**
@@ -232,7 +252,7 @@ async function watchCalendar(auth) {
         calendarId: 'jhkkf4eh49laqptu1i4esd8d8o@group.calendar.google.com',
         resource: {
             id,
-            address: process.env.WEBHOOK_CB,
+            address: process.env.WEBHOOK_CB2,
             type: 'web_hook',
             params: {
                 ttl: '30000',
