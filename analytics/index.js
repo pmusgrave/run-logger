@@ -1,4 +1,5 @@
 require('dotenv').config();
+var plotly = require('plotly')(process.env.PLOTLY_USER, process.env.PLOTLY_KEY);
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host     : process.env.MYSQL_HOST,
@@ -8,11 +9,74 @@ var connection = mysql.createConnection({
 });
 connection.connect();
 connection.query({
-    sql: 'SELECT * FROM runlog',
+    sql: 'SELECT * FROM runlog ORDER BY date',
     timeout: 40000,
     values: []
 }, (error, results, fields) => {
     if (error) console.log(error);
+    {  // PLOT
+        let dates = [];
+        let distances = [];
+        let mpw_dates = [];
+        let mpw = [];
+        for (let i = 0; i < results.length; i++) {
+            dates.push(results[i].date);
+            distances.push(results[i].distance_meters/1609.34);
+        }
+
+        let beginning = new Date(results[0].date);
+        beginning.setDate(beginning.getDate() - (beginning.getDay() + 7) % 7);
+        let end = new Date(results[results.length-1].date);
+        end.setDate(end.getDate() - (end.getDay() + 7) % 7);
+        let i = new Date(beginning);
+        while (i < end) {
+            i.setDate(i.getDate() + 7);
+            let current_mpw = 0;
+            for (let j = 0; j < 7; j++) {
+                let target_date = new Date(i);
+                target_date.setDate(target_date.getDate() + j);
+                let runs = results.filter((r) => {
+                    current_date = new Date(r.date);
+                    return current_date.getYear() == target_date.getYear()
+                        && current_date.getMonth() == target_date.getMonth()
+                        && current_date.getDate() == target_date.getDate();
+                });
+                for (let r = 0; r < runs.length; r++) {
+                    if (runs[r] && runs[r].distance_meters) {
+                        current_mpw += runs[r].distance_meters / 1609.34;
+                    }
+                }
+                if (current_mpw != 0) {
+                    mpw_dates.push(target_date);
+                    mpw.push(current_mpw);
+                }
+            }
+        }
+
+        let distance_data = {
+            x: dates,
+            y: distances,
+            mode: "markers",
+            type: "scatter",
+            name: "Distance",
+        };
+        let mpw_data = {
+            x: mpw_dates,
+            y: mpw,
+            mode: "markers",
+            type: "scatter",
+            name: "Miles Per Week",
+        };
+        let data = [distance_data, mpw_data];
+        let graph_options = {
+            filename: "date-axes",
+            fileopt: "overwrite",
+        };
+        plotly.plot(data, graph_options, (err, msg) => {
+            // console.log(msg);
+            if (err) throw err;
+        });
+    }  // END PLOT
 
     let total_distance = 0.0;
     let total_time = 0.0;
