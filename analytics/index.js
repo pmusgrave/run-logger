@@ -31,6 +31,7 @@ connection.query({
         let i = new Date(beginning);
         while (i < end) {
             i.setDate(i.getDate() + 7);
+            let mpw_period_date = new Date(i);
             let current_mpw = 0;
             for (let j = 0; j < 7; j++) {
                 let target_date = new Date(i);
@@ -46,10 +47,11 @@ connection.query({
                         current_mpw += runs[r].distance_meters / 1609.34;
                     }
                 }
-                if (current_mpw != 0) {
-                    mpw_dates.push(target_date);
-                    mpw.push(current_mpw);
-                }
+            }
+
+            if (current_mpw != 0) {
+                mpw_dates.push(mpw_period_date);
+                mpw.push(current_mpw);
             }
         }
 
