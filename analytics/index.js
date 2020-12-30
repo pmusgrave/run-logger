@@ -44,7 +44,7 @@ connection.query({
                 total_ms.toPrecision(5), "hours");
     console.log("Mean speed:\n\t",
                 mean_speed_mps.toPrecision(4), "meters/sec\n\t",
-                mean_speed_minpermile.toPrecision(4), "min/mi");
+                `${Math.floor(mean_speed_minpermile)}:${(mean_speed_minpermile%1*60).toPrecision(4)} min/mi`);
     console.log("Mean miles per week:\n\t",
                 mean_mpw.toPrecision(4), "mi");
 
@@ -103,8 +103,9 @@ connection.query({
     }).sort();
     let median_miles = sorted_distances[Math.floor(sorted_distances.length/2)];
     let median_min = sorted_times[Math.floor(sorted_times.length/2)];
+    let mean_speed = (median_min/median_miles);
     console.log(`Median distance of the past 7 days: ${median_miles} mi`);
-    console.log(`Median speed of the past 7 days: ${(median_min/median_miles).toPrecision(4)} min/mi`);
+    console.log(`Median speed of the past 7 days: ${Math.floor(mean_speed)}:${(mean_speed%1*60).toPrecision(4)} min/mi`);
     //connection.end();
 });
 
