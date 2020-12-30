@@ -73,10 +73,12 @@ connection.query({
     if (error) throw error;
     console.log("Your 10 fastest runs were:");
     for (let i = 0; i < results.length; i++) {
+        let distance = (results[i].distance_meters/1609.34).toPrecision(3);
+        let speed = ((results[i].duration/1000/60)/(results[i].distance_meters/1609.34));
         console.log("\t",
                     new Date(results[i].date).toLocaleDateString(), "-",
-                    (results[i].distance_meters/1609.34).toPrecision(3), "miles at",
-                    ((results[i].duration/1000/60)/(results[i].distance_meters/1609.34)).toPrecision(3),
+                    distance, "miles at",
+                    `${Math.floor(speed)}:${(speed%1*60).toPrecision(4)}`,
                     "min/mi");
     }
     connection.end();
