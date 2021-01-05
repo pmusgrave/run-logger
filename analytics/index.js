@@ -92,22 +92,27 @@ connection.query({
     if (error) throw error;
     console.log("MPW for the past 7 days:");
     let mpw = 0;
+    let total_time = 0;
     for (let i = 0; i < results.length; i++) {
         mpw += (results[i].distance_meters / 1609.34);
+        total_time += (results[i].duration/1000/60);
     }
     console.log("\t", mpw.toPrecision(4), "mpw");
 
     let sorted_distances = results.map((row) => {
-        return row.distance_meters/1609.34
+        return row.distance_meters/1609.34;
     }).sort();
     let sorted_times = results.map((row) => {
         return row.duration/1000/60;
     }).sort();
+
     let median_miles = sorted_distances[Math.floor(sorted_distances.length/2)];
     let median_min = sorted_times[Math.floor(sorted_times.length/2)];
-    let mean_speed = (median_min/median_miles);
+    let median_speed = (median_min/median_miles);
+    let mean_speed = total_time/mpw;
     console.log(`Median distance of the past 7 days: ${median_miles} mi`);
-    console.log(`Median speed of the past 7 days: ${Math.floor(mean_speed)}:${(mean_speed%1*60).toPrecision(4)} min/mi`);
+    console.log(`Median speed of the past 7 days: ${Math.floor(median_speed)}:${(median_speed%1*60).toPrecision(4)} min/mi`);
+    console.log(`Mean speed of the past 7 days: ${Math.floor(mean_speed)}:${(mean_speed%1*60).toPrecision(4)} min/mi`);
     //connection.end();
 });
 
