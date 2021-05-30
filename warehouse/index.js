@@ -2,14 +2,21 @@ require('dotenv').config();
 const fs = require('fs');
 let request = require('request');
 const { v4: uuidv4 } = require('uuid');
+
 const {google} = require('googleapis');
+const auth = new google.auth.GoogleAuth({
+    keyFile: process.env.GOOGLE_AUTH_KEY_PATH,
+    scopes: ['https://www.googleapis.com/auth/calendar'],
+});
+
 const readline = require('readline');
 let mysql = require('mysql');
 let connection = mysql.createConnection({
     host     : process.env.MYSQL_HOST,
     user     : process.env.MYSQL_USER,
     password : process.env.MYSQL_PASS,
-    database : process.env.MYSQL_DB
+    database : process.env.MYSQL_DB,
+    port     : process.env.MYSQL_PORT
 });
 connection.connect();
 
@@ -33,19 +40,26 @@ fs.readFile('credentials.json', (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
 
     authorize(JSON.parse(content), watchCalendar);
+    /*
     setInterval(() => {
         authorize(JSON.parse(content), watchCalendar);
     }, 1000*60*60*24*7);
 
+    
     authorize(JSON.parse(content), storeNewEvents);
     setInterval(() => {
         authorize(JSON.parse(content), storeNewEvents);
     }, 1000*60*60);
-
+    */
     app.post('/*', (req, res) => {
-        //console.log(req);
+        console.log('POST REQ');
         authorize(JSON.parse(content), storeNewEvents);
     });
+    app.get('/*', (req,res,next) => {
+	console.log('GET REQ');
+	authorize(JSON.parse(content), storeNewEvents);
+    });
+
 });
 
 /**
@@ -55,7 +69,7 @@ fs.readFile('credentials.json', (err, content) => {
  * @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
-  const {client_secret, client_id, redirect_uris} = credentials.installed;
+  const {client_secret, client_id, redirect_uris} = credentials.web;//credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
       client_id, client_secret, redirect_uris[0]);
 
@@ -252,7 +266,7 @@ async function watchCalendar(auth) {
         calendarId: 'jhkkf4eh49laqptu1i4esd8d8o@group.calendar.google.com',
         resource: {
             id,
-            address: process.env.WEBHOOK_CB2,
+            address: process.env.WEBHOOK_CB,
             type: 'web_hook',
             params: {
                 ttl: '30000',
@@ -261,5 +275,5 @@ async function watchCalendar(auth) {
     }).catch((err) => {
         console.log(err)
     });
-    console.log(response);
+    console.log('WATCH RES', response);
 }
