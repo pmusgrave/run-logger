@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '/home/pi/Documents/run-logger/warehouse/.env' });
 const fs = require('fs');
 let request = require('request');
 const { v4: uuidv4 } = require('uuid');
@@ -20,46 +20,45 @@ let connection = mysql.createConnection({
 });
 connection.connect();
 
+let progress = {};
+
 ///////////////////////////////////////
 var express = require('express');
 var app = express();
 var path = require('path');
 
-// viewed at http://localhost:8080
-app.get('/*', function(req, res) {
+app.get('/*', (req, res) => {
+    console.log(`${(new Date).toISOString()}: GET REQ`);
     res.sendFile(path.join(__dirname + '/googlec2523245017e1126.html'));
 });
 
 app.listen(process.env.PORT || 8080);
+console.log("listening on port", process.env.PORT||8080);
 ///////////////////////////////////////
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
-const TOKEN_PATH = 'token.json';
+const TOKEN_PATH = path.join(__dirname + '/token.json');
 
-fs.readFile('credentials.json', (err, content) => {
+fs.readFile(path.join(__dirname + '/credentials.json'), (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
 
     authorize(JSON.parse(content), watchCalendar);
-    /*
+
     setInterval(() => {
         authorize(JSON.parse(content), watchCalendar);
     }, 1000*60*60*24*7);
+    /*
 
-    
     authorize(JSON.parse(content), storeNewEvents);
     setInterval(() => {
         authorize(JSON.parse(content), storeNewEvents);
     }, 1000*60*60);
     */
     app.post('/*', (req, res) => {
-        console.log('POST REQ');
+        console.log(`${(new Date).toISOString()}: POST REQ`);
         authorize(JSON.parse(content), storeNewEvents);
+	      res.status(200).send();
     });
-    app.get('/*', (req,res,next) => {
-	console.log('GET REQ');
-	authorize(JSON.parse(content), storeNewEvents);
-    });
-
 });
 
 /**
@@ -105,7 +104,7 @@ function getAccessToken(oAuth2Client, callback) {
       // Store the token to disk for later program executions
       fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
         if (err) return console.error(err);
-        console.log('Token stored to', TOKEN_PATH);
+          console.log(`${(new Date).toISOString()}: Token stored to`, TOKEN_PATH);
       });
       callback(oAuth2Client);
     });
@@ -206,11 +205,17 @@ function storeNewEvents(auth) {
         }, (err, res) => {
             if (err) return console.log('The API returned an error: ' + err);
             const events = res.data.items;
+	    const etag = res.data.etag;
+	    if (progress[etag]) {
+		return;
+	    }
+	    progress[etag] = true;
+	    setTimeout(() => {delete progress[etag]}, 100000);
             if (events.length) {
                 events.filter((event) => {
                     return event.summary.includes('running');
                 }).map((event, i) => {
-                    const start = event.start.dateTime || event.start.date;
+                       const start = event.start.dateTime || event.start.date;
                     //let start_date = new Date(start);
                     //console.log(start_date);
                     console.log(`${start} - ${event.summary}`);
@@ -268,12 +273,9 @@ async function watchCalendar(auth) {
             id,
             address: process.env.WEBHOOK_CB,
             type: 'web_hook',
-            params: {
-                ttl: '30000',
-            },
         },
     }).catch((err) => {
         console.log(err)
     });
-    console.log('WATCH RES', response);
+    console.log(`${(new Date).toISOString()}: WATCH RES`, response);
 }
