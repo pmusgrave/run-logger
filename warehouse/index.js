@@ -11,14 +11,15 @@ const auth = new google.auth.GoogleAuth({
 
 const readline = require('readline');
 let mysql = require('mysql');
-let connection = mysql.createConnection({
+let pool  = mysql.createPool({
+    connectionLimit : 10,
     host     : process.env.MYSQL_HOST,
     user     : process.env.MYSQL_USER,
     password : process.env.MYSQL_PASS,
     database : process.env.MYSQL_DB,
     port     : process.env.MYSQL_PORT
 });
-connection.connect();
+//connection.connect();
 
 let progress = {};
 
@@ -165,7 +166,7 @@ function storeAllEvents(auth) {
             if (isNaN(hour) || isNaN(min) || isNaN(sec)) return;
             let total_millis = (hour*60*60 + min*60 + sec) * 1000;
 
-            connection.query({
+            pool.query({
                 sql: 'INSERT INTO runlog (date, duration, distance_meters) values (?,?,?)',
                 timeout: 40000,
                 values: [start, total_millis, distance]
@@ -189,7 +190,7 @@ function storeAllEvents(auth) {
 function storeNewEvents(auth) {
     console.log(`${(new Date).toISOString()}: Checking for new events`);
     const calendar = google.calendar({version: 'v3', auth});
-    connection.query({
+    pool.query({
         sql: 'SELECT MAX(date) FROM runlog;',
         timeout: 40000
     }, function (error, results, fields) {
@@ -249,7 +250,7 @@ function storeNewEvents(auth) {
                     if (isNaN(hour) || isNaN(min) || isNaN(sec)) return;
                     let total_millis = (hour*60*60 + min*60 + sec) * 1000;
 
-                    connection.query({
+                    pool.query({
                         sql: 'INSERT INTO runlog (date, duration, distance_meters) values (?,?,?)',
                         timeout: 40000,
                         values: [start, total_millis, distance]
