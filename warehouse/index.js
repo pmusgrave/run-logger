@@ -23,9 +23,11 @@ connection.connect();
 let progress = {};
 
 ///////////////////////////////////////
-var express = require('express');
-var app = express();
-var path = require('path');
+let express = require('express');
+let app = express();
+let path = require('path');
+let helmet = require('helmet');
+app.use(helmet());
 
 app.get('/*', (req, res) => {
     console.log(`${(new Date).toISOString()}: GET REQ`);
