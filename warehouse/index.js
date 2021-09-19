@@ -9,6 +9,8 @@ const auth = new google.auth.GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/calendar'],
 });
 
+const { GarminConnect } = require('garmin-connect');
+
 const readline = require('readline');
 let mysql = require('mysql');
 let pool  = mysql.createPool({
@@ -57,6 +59,11 @@ fs.readFile(path.join(__dirname + '/credentials.json'), (err, content) => {
         authorize(JSON.parse(content), storeNewEvents);
     }, 1000*60*60);
     */
+
+    setInterval(() => {
+        authorize(JSON.parse(content), syncGarmin);
+    }, 1000*60*60*24);
+
     app.post('/*', (req, res) => {
         console.log(`${(new Date).toISOString()}: POST REQ`);
         authorize(JSON.parse(content), storeNewEvents);
@@ -81,6 +88,22 @@ function authorize(credentials, callback) {
     oAuth2Client.setCredentials(JSON.parse(token));
     callback(oAuth2Client);
   });
+}
+
+function createCalendarEvent(garminActivity) {
+    const METERS_IN_MILE = 1609.34;
+    return {
+        'summary': `running / ${(garminActivity.distance / METERS_IN_MILE).toFixed(2)}mi / ${parseTime(garminActivity)}`,
+        'description': JSON.stringify({source: "Garmin", id: garminActivity.activityId}),
+        'start': {
+            'date': garminActivity.startTimeLocal.split(" ")[0],
+            'timeZone': 'America/New_York',
+        },
+        'end': {
+            'date': garminActivity.startTimeLocal.split(" ")[0],
+            'timeZone': 'America/New_York',
+        },
+    };
 }
 
 /**
@@ -114,6 +137,43 @@ function getAccessToken(oAuth2Client, callback) {
   });
 }
 
+function getLastStoredEventId() {
+    pool.query({
+        sql: 'SELECT MAX(garmin_activity_id) FROM runlog;',
+        timeout: 40000,
+        values: [],
+    }, function (error, results, fields) {
+        return results[0]['MAX(garmin_activity_id)'];
+    });
+}
+
+/* Garmin stores distance in meters and duration in seconds */
+function parseTime(activity) {
+    let hrs = Math.floor(activity.duration/3600);
+    let min = Math.floor((activity.duration - hrs*3600)/60);
+    let sec = activity.duration - hrs*3600 - min*60;
+    if (hrs > 0) {
+        return `${hrs}hr ${min}min ${sec.toFixed(2)}s`;
+    } else {
+        return `${min}min ${sec.toFixed(2)}s`;
+    }
+}
+
+function pushToCalendar(auth, event) {
+    const calendar = google.calendar({version: 'v3', auth});
+    calendar.events.insert({
+        auth: auth,
+        calendarId: process.env.GOOGLE_CAL_ID,
+        resource: event,
+    }, function(err, event) {
+        if (err) {
+            console.log('There was an error contacting the Calendar service: ' + err);
+            return;
+        }
+        console.log('Event created: %s', event.htmlLink);
+    });
+}
+
 /**
  * Format events and insert them into MySQL DB
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
@@ -122,7 +182,7 @@ function storeAllEvents(auth) {
   const calendar = google.calendar({version: 'v3', auth});
   const start_date = new Date('January 1, 1970 00:00:00');
   calendar.events.list({
-    calendarId: 'jhkkf4eh49laqptu1i4esd8d8o@group.calendar.google.com',
+    calendarId: process.env.GOOGLE_CAL_ID,
     timeMin: start_date.toISOString(),
     maxResults: 10000,
     singleEvents: true,
@@ -183,6 +243,18 @@ function storeAllEvents(auth) {
   });
 }
 
+function storeGarminEventInDb(garminActivity) {
+    const start = garminActivity.startTimeLocal.split(" ")[0];
+    const total_millis = garminActivity.duration * 1000;
+    pool.query({
+        sql: 'INSERT INTO runlog (date, duration, distance_meters, garmin_activity_id) values (?,?,?,?)',
+        timeout: 40000,
+        values: [start, total_millis, garminActivity.distance, garminActivity.activityId]
+    }, function (error, results, fields) {
+        console.log(results);
+    });
+}
+
 /**
  * Format only new events since last update and insert them into MySQL DB
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
@@ -216,7 +288,12 @@ function storeNewEvents(auth) {
 	    setTimeout(() => {delete progress[etag]}, 100000);
             if (events.length) {
                 events.filter((event) => {
-                    return event.summary.includes('running');
+                    const description = JSON.parse(event.description);
+                    if (description && description.source) {
+                        return event.summary.includes('running') && description.source !== "Garmin";
+                    } else {
+                        return event.summary.includes('running');
+                    }
                 }).map((event, i) => {
                        const start = event.start.dateTime || event.start.date;
                     //let start_date = new Date(start);
@@ -265,6 +342,23 @@ function storeNewEvents(auth) {
                 //connection.end();
             }
         });
+    });
+}
+
+async function syncGarmin(auth) {
+    const GCClient = new GarminConnect();
+    await GCClient.login(process.env.GARMIN_USER, process.env.GARMIN_PASS);
+    const userInfo = await GCClient.getUserInfo();
+    const activities = await GCClient.getActivities();
+    let lastStoredEventId = getLastStoredEventId();
+    let newActivities = [];
+    if (lastStoredEventId) {
+        newActivities = activities.filter(activity => activity.activityId > lastStoredEventId && activity.activityType.typeKey === "running");
+    }
+    newActivities = newActivities.map(activity => {
+        storeGarminEventInDb(activity);
+        let calendarEvent = createCalendarEvent(activity);
+        authorize(() => pushToCalendar(auth, calendarEvent));
     });
 }
 
