@@ -288,13 +288,13 @@ function storeNewEvents(auth) {
 	    setTimeout(() => {delete progress[etag]}, 100000);
             if (events.length) {
                 events.filter((event) => {
-		    let description = null;
-		    try {
+		                let description = null;
+		                try {
                         description = JSON.parse(event.description);
-		    } catch (err) {
-			// console.error(err);
-			console.log("Calendar event description was empty. Assuming manually created event");
-		    }
+		                } catch (err) {
+			                  // console.error(err);
+			                  console.log("Calendar event description was empty. Assuming manually created event");
+		                }
                     if (description && description.source) {
                         return event.summary.includes('running') && description.source !== "Garmin";
                     } else {
