@@ -158,9 +158,10 @@ function parseTime(activity) {
 }
 
 function pushToCalendar(auth, event) {
+    console.log(auth);
     const calendar = google.calendar({version: 'v3', auth});
     calendar.events.insert({
-        auth: googleCredentials,
+        auth,
         calendarId: process.env.GOOGLE_CAL_ID,
         resource: event,
     }, function(err, event) {
@@ -242,6 +243,7 @@ function storeAllEvents(auth) {
 }
 
 function storeGarminEventInDb(garminActivity) {
+    console.log("Storing Garmin event in DB", garminActivity);
     const start = garminActivity.startTimeLocal.split(" ")[0];
     const total_millis = garminActivity.duration * 1000;
     pool.query({
@@ -361,9 +363,13 @@ async function syncGarmin() {
 	const userInfo = await GCClient.getUserInfo();
 	const activities = await GCClient.getActivities();
 	let newActivities = [];
-	console.log("Garmin activities", activities);
 	if (lastStoredEventId && Array.isArray(activities)) {
-            newActivities = activities.filter(activity => activity.activityId > lastStoredEventId && activity.activityType.typeKey === "running");
+            newActivities = activities
+		.filter(activity =>
+			activity.activityId > lastStoredEventId
+			&& activity.activityType.typeKey === "running")
+		.sort((a1, a2) =>
+		      a1.activityId - a2.activityId);
 	} else if(lastStoredEventId) {
 	    newActivities = [activities];
 	}
@@ -371,7 +377,7 @@ async function syncGarmin() {
 	newActivities = newActivities.map(activity => {
             storeGarminEventInDb(activity);
             let calendarEvent = createCalendarEvent(activity);
-            authorize(googleCredentials, () => pushToCalendar(calendarEvent));
+            authorize(googleCredentials, (auth) => pushToCalendar(auth, calendarEvent));
 	});
     });
 }
