@@ -8,8 +8,10 @@ const auth = new google.auth.GoogleAuth({
     keyFile: process.env.GOOGLE_AUTH_KEY_PATH,
     scopes: ['https://www.googleapis.com/auth/calendar'],
 });
+let googleCredentials;
 
 const { GarminConnect } = require('garmin-connect');
+const GCClient = new GarminConnect();
 
 const readline = require('readline');
 let mysql = require('mysql');
@@ -44,29 +46,31 @@ console.log("listening on port", process.env.PORT||8080);
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 const TOKEN_PATH = path.join(__dirname + '/token.json');
 
-fs.readFile(path.join(__dirname + '/credentials.json'), (err, content) => {
+fs.readFile(path.join(__dirname + '/credentials.json'), async (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
+    googleCredentials = JSON.parse(content);
 
-    authorize(JSON.parse(content), watchCalendar);
+    authorize(googleCredentials, watchCalendar);
 
     setInterval(() => {
-        authorize(JSON.parse(content), watchCalendar);
+        authorize(googleCredentials, watchCalendar);
     }, 1000*60*60*24*7);
-    /*
 
+    /*
     authorize(JSON.parse(content), storeNewEvents);
     setInterval(() => {
         authorize(JSON.parse(content), storeNewEvents);
     }, 1000*60*60);
     */
 
-    setInterval(() => {
-        authorize(JSON.parse(content), syncGarmin);
+    authorize(googleCredentials, syncGarmin);
+    setInterval(async () => {
+        authorize(googleCredentials, syncGarmin);
     }, 1000*60*60*24);
 
     app.post('/*', (req, res) => {
         console.log(`${(new Date).toISOString()}: POST REQ`);
-        authorize(JSON.parse(content), storeNewEvents);
+        authorize(googleCredentials, storeNewEvents);
 	      res.status(200).send();
     });
 });
@@ -78,7 +82,7 @@ fs.readFile(path.join(__dirname + '/credentials.json'), (err, content) => {
  * @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
-  const {client_secret, client_id, redirect_uris} = credentials.web;//credentials.installed;
+  const { client_secret, client_id, redirect_uris } = credentials.web;//credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
       client_id, client_secret, redirect_uris[0]);
 
@@ -138,13 +142,7 @@ function getAccessToken(oAuth2Client, callback) {
 }
 
 function getLastStoredEventId() {
-    pool.query({
-        sql: 'SELECT MAX(garmin_activity_id) FROM runlog;',
-        timeout: 40000,
-        values: [],
-    }, function (error, results, fields) {
-        return results[0]['MAX(garmin_activity_id)'];
-    });
+
 }
 
 /* Garmin stores distance in meters and duration in seconds */
@@ -162,7 +160,7 @@ function parseTime(activity) {
 function pushToCalendar(auth, event) {
     const calendar = google.calendar({version: 'v3', auth});
     calendar.events.insert({
-        auth: auth,
+        auth: googleCredentials,
         calendarId: process.env.GOOGLE_CAL_ID,
         resource: event,
     }, function(err, event) {
@@ -351,20 +349,30 @@ function storeNewEvents(auth) {
     });
 }
 
-async function syncGarmin(auth) {
-    const GCClient = new GarminConnect();
-    await GCClient.login(process.env.GARMIN_USER, process.env.GARMIN_PASS);
-    const userInfo = await GCClient.getUserInfo();
-    const activities = await GCClient.getActivities();
-    let lastStoredEventId = getLastStoredEventId();
-    let newActivities = [];
-    if (lastStoredEventId) {
-        newActivities = activities.filter(activity => activity.activityId > lastStoredEventId && activity.activityType.typeKey === "running");
-    }
-    newActivities = newActivities.map(activity => {
-        storeGarminEventInDb(activity);
-        let calendarEvent = createCalendarEvent(activity);
-        authorize(() => pushToCalendar(auth, calendarEvent));
+async function syncGarmin() {
+    pool.query({
+        sql: 'SELECT MAX(garmin_activity_id) FROM runlog;',
+        timeout: 40000,
+        values: [],
+    }, async (error, results, fields) => {
+        let lastStoredEventId = results[0]['MAX(garmin_activity_id)'];
+	const GCClient = new GarminConnect();
+	await GCClient.login(process.env.GARMIN_USER, process.env.GARMIN_PASS);
+	const userInfo = await GCClient.getUserInfo();
+	const activities = await GCClient.getActivities();
+	let newActivities = [];
+	console.log("Garmin activities", activities);
+	if (lastStoredEventId && Array.isArray(activities)) {
+            newActivities = activities.filter(activity => activity.activityId > lastStoredEventId && activity.activityType.typeKey === "running");
+	} else if(lastStoredEventId) {
+	    newActivities = [activities];
+	}
+	    
+	newActivities = newActivities.map(activity => {
+            storeGarminEventInDb(activity);
+            let calendarEvent = createCalendarEvent(activity);
+            authorize(googleCredentials, () => pushToCalendar(calendarEvent));
+	});
     });
 }
 
