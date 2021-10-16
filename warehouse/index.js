@@ -68,10 +68,17 @@ fs.readFile(path.join(__dirname + '/credentials.json'), async (err, content) => 
         authorize(googleCredentials, syncGarmin);
     }, 1000*60*60*24);
 
+    app.post('/sync', (req, res) => {
+	console.log(`${(new Date).toISOString()}: POST /sync`);
+	authorize(googleCredentials, syncGarmin);
+	res.status(200).send();
+    });
+
+
     app.post('/*', (req, res) => {
         console.log(`${(new Date).toISOString()}: POST REQ`);
         authorize(googleCredentials, storeNewEvents);
-	      res.status(200).send();
+	res.status(200).send();
     });
 });
 
