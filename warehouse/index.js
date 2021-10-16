@@ -103,15 +103,18 @@ function authorize(credentials, callback) {
 
 function createCalendarEvent(garminActivity) {
     const METERS_IN_MILE = 1609.34;
+    let start_date = new Date(garminActivity.startTimeLocal.split(" ")[0]);
+    let end_date = new Date(garminActivity.startTimeLocal.split(" ")[0]);
+    end_date.setDate(start_date.getDate() + 1);
     return {
         'summary': `running / ${(garminActivity.distance / METERS_IN_MILE).toFixed(2)}mi / ${parseTime(garminActivity)}`,
         'description': JSON.stringify({source: "Garmin", id: garminActivity.activityId}),
         'start': {
-            'date': garminActivity.startTimeLocal.split(" ")[0],
+            'date': start_date,
             'timeZone': 'America/New_York',
         },
         'end': {
-            'date': garminActivity.startTimeLocal.split(" ")[0],
+            'date': end_date,
             'timeZone': 'America/New_York',
         },
     };
@@ -365,7 +368,6 @@ async function syncGarmin() {
         values: [],
     }, async (error, results, fields) => {
         let lastStoredEventId = results[0]['MAX(garmin_activity_id)'];
-	const GCClient = new GarminConnect();
 	await GCClient.login(process.env.GARMIN_USER, process.env.GARMIN_PASS);
 	const userInfo = await GCClient.getUserInfo();
 	const activities = await GCClient.getActivities();
