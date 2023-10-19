@@ -24,8 +24,11 @@ const db_connection_info = await vault.read(process.env.VAULT_DB_PATH);
 const app_config = await vault.read(process.env.VAULT_APP_MOUNT);
 
 const { GarminConnect } = require('garmin-connect');
-const GCClient = new GarminConnect();
-
+const GCClient = new GarminConnect({
+    username: app_config.data.GARMIN_USER,
+    password: app_config.data.GARMIN_PASS
+});
+    
 const readline = require('readline');
 let mysql = require('mysql');
 let pool  = mysql.createPool({
@@ -365,7 +368,7 @@ function storeNewEvents(auth) {
                 // connection.end();
             } else {
                 console.log('No new events found.');
-                //connection.end();
+                connection.end();
             }
         });
     });
@@ -378,9 +381,8 @@ async function syncGarmin() {
         values: [],
     }, async (error, results, fields) => {
         let lastStoredEventId = results[0]['MAX(garmin_activity_id)'];
-	const GCClient = new GarminConnect();
-	await GCClient.login(app_config.data.GARMIN_USER, app_config.data.GARMIN_PASS);
-	const userInfo = await GCClient.getUserInfo();
+	await GCClient.login();
+	// const userInfo = await GCClient.getUserInfo();
 	const activities = await GCClient.getActivities();
 	let newActivities = [];
 	if (lastStoredEventId && Array.isArray(activities)) {
@@ -393,7 +395,8 @@ async function syncGarmin() {
 	} else if(lastStoredEventId) {
 	    newActivities = [activities];
 	}
-	    
+
+	console.log("new activities:", newActivities);
 	newActivities = newActivities.map(activity => {
             storeGarminEventInDb(activity);
             let calendarEvent = createCalendarEvent(activity);
