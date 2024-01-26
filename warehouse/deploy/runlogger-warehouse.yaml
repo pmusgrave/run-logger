@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: runlogger-warehouse-deployment
+  labels:
+    app: runlogger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: runlogger
+  template:
+    metadata:
+      labels:
+        app: runlogger
+    spec:
+      containers:
+      - name: runlogger-warehouse
+        image: 580849355259.dkr.ecr.us-east-1.amazonaws.com/runlogger:latest
+        ports:
+        - containerPort: 443
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: runlogger-warehouse-service
+spec:
+  selector:
+    app: runlogger
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 3003

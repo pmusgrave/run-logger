@@ -1,6 +1,6 @@
 (async () => {
 
-require('dotenv').config({ path: '/home/pi/Documents/run-logger/warehouse/.env' });
+require('dotenv').config({ path: './.env' });
 const fs = require('fs');
 let request = require('request');
 const { v4: uuidv4 } = require('uuid');
@@ -12,28 +12,17 @@ const auth = new google.auth.GoogleAuth({
 });
 let googleCredentials;
 
-let vault = require("node-vault")({
-    apiVersion: 'v1',
-    endpoint: process.env.VAULT_ADDR,
-    token: process.env.VAULT_TOKEN,
-    requestOptions: {
-      strictSSL: false,
-    }
-});
-const db_connection_info = await vault.read(process.env.VAULT_DB_PATH);
-const app_config = await vault.read(process.env.VAULT_APP_MOUNT);
-
 const { GarminConnect } = require('garmin-connect');
     
 const readline = require('readline');
 let mysql = require('mysql');
 let pool  = mysql.createPool({
     connectionLimit : 10,
-    host     : db_connection_info.data.MYSQL_HOST,
-    port     : db_connection_info.data.MYSQL_PORT,
-    user     : app_config.data.MYSQL_USER,
-    password : app_config.data.MYSQL_PASS,
-    database : app_config.data.MYSQL_DB,
+    host     : process.env.MYSQL_HOST,
+    port     : process.env.MYSQL_PORT,
+    user     : process.env.MYSQL_USER,
+    password : process.env.MYSQL_PASS,
+    database : process.env.MYSQL_DB,
 });
 //connection.connect();
 
@@ -51,8 +40,8 @@ app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname + '/googlec2523245017e1126.html'));
 });
 
-app.listen(app_config.data.PORT || 8080);
-console.log("listening on port", app_config.data.PORT||8080);
+app.listen(process.env.PORT || 8080);
+console.log("listening on port", process.env.PORT||8080);
 ///////////////////////////////////////
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
@@ -181,7 +170,7 @@ function pushToCalendar(auth, event) {
     const calendar = google.calendar({version: 'v3', auth});
     calendar.events.insert({
         auth,
-        calendarId: app_config.data.GOOGLE_CAL_ID,
+        calendarId: process.env.GOOGLE_CAL_ID,
         resource: event,
     }, function(err, event) {
         if (err) {
@@ -200,7 +189,7 @@ function storeAllEvents(auth) {
   const calendar = google.calendar({version: 'v3', auth});
   const start_date = new Date('January 1, 1970 00:00:00');
   calendar.events.list({
-    calendarId: app_config.data.GOOGLE_CAL_ID,
+    calendarId: process.env.GOOGLE_CAL_ID,
     timeMin: start_date.toISOString(),
     maxResults: 10000,
     singleEvents: true,
@@ -309,10 +298,10 @@ function storeNewEvents(auth) {
                 events.filter((event) => {
 		                let description = null;
 		                try {
-                        description = JSON.parse(event.description);
+        		                description = JSON.parse(event.description);
 		                } catch (err) {
 			                  // console.error(err);
-			                  console.log("Calendar event description was empty. Assuming manually created event");
+			                console.log("Calendar event description was empty. Assuming manually created event");
 		                }
                     if (description && description.source) {
                         return event.summary.includes('running') && description.source !== "Garmin";
@@ -379,8 +368,8 @@ async function syncGarmin() {
 	}, async (error, results, fields) => {
             let lastStoredEventId = results[0]['MAX(garmin_activity_id)'];
 	    const GCClient = new GarminConnect({
-		username: app_config.data.GARMIN_USER,
-		password: app_config.data.GARMIN_PASS
+		username: process.env.GARMIN_USER,
+		password: process.env.GARMIN_PASS
 	    });
 	    await GCClient.login();
 	    // const userInfo = await GCClient.getUserInfo();
@@ -412,10 +401,10 @@ async function syncGarmin() {
 async function watchCalendar(auth) {
     let id = uuidv4();
     const response = await google.calendar({ version: 'v3', auth }).events.watch({
-        calendarId: app_config.data.GOOGLE_CAL_ID,
+        calendarId: process.env.GOOGLE_CAL_ID,
         resource: {
             id,
-            address: app_config.data.WEBHOOK_CB,
+            address: process.env.WEBHOOK_CB,
             type: 'web_hook',
         },
     }).catch((err) => {
