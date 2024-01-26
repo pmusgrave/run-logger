@@ -1,0 +1,7 @@
+require('dotenv').config({ path: '/home/pi/Documents/run-logger/warehouse/.env' });
+
+function authorize(credentials, cb) {
+    cb(credentials);
+}
+
+authorize("these are credentials", (auth) => { console.log("this is a callback", auth) });

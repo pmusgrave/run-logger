@@ -1,5 +1,5 @@
 require('dotenv').config();
-var plotly = require('plotly')(process.env.PLOTLY_USER, process.env.PLOTLY_KEY);
+//var plotly = require('plotly')(process.env.PLOTLY_USER, process.env.PLOTLY_KEY);
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host     : process.env.MYSQL_HOST,
@@ -186,8 +186,8 @@ function plot(results) {
             filename: "date-axes",
             fileopt: "overwrite",
         };
-        plotly.plot(data, graph_options, (err, msg) => {
+        /*plotly.plot(data, graph_options, (err, msg) => {
             // console.log(msg);
             if (err) throw err;
-        });
+        });*/
     }  // END PLOT

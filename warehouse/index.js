@@ -24,10 +24,6 @@ const db_connection_info = await vault.read(process.env.VAULT_DB_PATH);
 const app_config = await vault.read(process.env.VAULT_APP_MOUNT);
 
 const { GarminConnect } = require('garmin-connect');
-const GCClient = new GarminConnect({
-    username: app_config.data.GARMIN_USER,
-    password: app_config.data.GARMIN_PASS
-});
     
 const readline = require('readline');
 let mysql = require('mysql');
@@ -368,41 +364,49 @@ function storeNewEvents(auth) {
                 // connection.end();
             } else {
                 console.log('No new events found.');
-                connection.end();
+                //connection.end();
             }
         });
     });
 }
 
 async function syncGarmin() {
-    pool.query({
-        sql: 'SELECT MAX(garmin_activity_id) FROM runlog;',
-        timeout: 40000,
-        values: [],
-    }, async (error, results, fields) => {
-        let lastStoredEventId = results[0]['MAX(garmin_activity_id)'];
-	await GCClient.login();
-	// const userInfo = await GCClient.getUserInfo();
-	const activities = await GCClient.getActivities();
-	let newActivities = [];
-	if (lastStoredEventId && Array.isArray(activities)) {
-            newActivities = activities
-		.filter(activity =>
-			activity.activityId > lastStoredEventId
-			&& activity.activityType.typeKey === "running")
-		.sort((a1, a2) =>
-		      a1.activityId - a2.activityId);
-	} else if(lastStoredEventId) {
-	    newActivities = [activities];
-	}
+    try {
+	pool.query({
+            sql: 'SELECT MAX(garmin_activity_id) FROM runlog;',
+            timeout: 40000,
+            values: [],
+	}, async (error, results, fields) => {
+            let lastStoredEventId = results[0]['MAX(garmin_activity_id)'];
+	    const GCClient = new GarminConnect({
+		username: app_config.data.GARMIN_USER,
+		password: app_config.data.GARMIN_PASS
+	    });
+	    await GCClient.login();
+	    // const userInfo = await GCClient.getUserInfo();
+	    const activities = await GCClient.getActivities();
+	    let newActivities = [];
+	    if (lastStoredEventId && Array.isArray(activities)) {
+		newActivities = activities
+		    .filter(activity =>
+			    activity.activityId > lastStoredEventId
+			    && activity.activityType.typeKey === "running")
+		    .sort((a1, a2) =>
+			  a1.activityId - a2.activityId);
+	    } else if(lastStoredEventId) {
+		newActivities = [activities];
+	    }
 
-	console.log("new activities:", newActivities);
-	newActivities = newActivities.map(activity => {
-            storeGarminEventInDb(activity);
-            let calendarEvent = createCalendarEvent(activity);
-            authorize(googleCredentials, (auth) => pushToCalendar(auth, calendarEvent));
+	    console.log("new activities:", newActivities);
+	    newActivities = newActivities.map(activity => {
+		storeGarminEventInDb(activity);
+		let calendarEvent = createCalendarEvent(activity);
+		authorize(googleCredentials, (auth) => pushToCalendar(auth, calendarEvent));
+	    });
 	});
-    });
+    } catch (error) {
+	console.error(error);
+    }
 }
 
 async function watchCalendar(auth) {
